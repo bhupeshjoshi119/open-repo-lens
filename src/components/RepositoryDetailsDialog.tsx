@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Send, Sparkles, ExternalLink, Lightbulb, Target, Brain, Zap } from "lucide-react";
 import { useRepositoryAnalysis } from "@/hooks/useRepositoryAnalysis";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 interface Repository {
   id: number;
@@ -182,43 +181,38 @@ export const RepositoryDetailsDialog = ({
             <div className="space-y-4">
               <h4 className="font-semibold">Ask AI about this Repository</h4>
               
-              {/* Preset Prompts */}
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">Quick Analysis Options:</p>
-                <ScrollArea className="h-[240px] pr-3">
-                  <div className="grid gap-3">
-                    {PRESET_PROMPTS.map((preset) => {
-                      const Icon = preset.icon;
-                      return (
-                        <Card 
-                          key={preset.id}
-                          className="cursor-pointer hover:bg-accent/50 hover:border-primary/40 transition-all duration-200 hover:shadow-sm"
-                          onClick={() => !loading && handlePresetClick(preset.prompt)}
-                        >
-                          <CardHeader className="p-4">
-                            <CardTitle className="text-sm flex items-center gap-2">
-                              <Icon className="w-4 h-4 text-primary" />
-                              {preset.title}
-                            </CardTitle>
-                            <CardDescription className="text-xs">
-                              {preset.description}
-                            </CardDescription>
-                          </CardHeader>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </ScrollArea>
+              {/* Preset Prompts - Compact Grid */}
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Quick Analysis:</p>
+                <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2">
+                  {PRESET_PROMPTS.map((preset) => {
+                    const Icon = preset.icon;
+                    return (
+                      <button
+                        key={preset.id}
+                        onClick={() => !loading && handlePresetClick(preset.prompt)}
+                        disabled={loading}
+                        className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 hover:border-primary/40 transition-all duration-200 hover:shadow-sm text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Icon className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                        <div className="space-y-0.5 min-w-0">
+                          <p className="text-sm font-medium leading-tight">{preset.title}</p>
+                          <p className="text-xs text-muted-foreground leading-tight">{preset.description}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {/* Custom Question Section */}
-              <div className="space-y-3 pt-2">
-                <p className="text-sm text-muted-foreground">Or ask a custom question:</p>
+              {/* Custom Question Section - Always Visible */}
+              <div className="space-y-3 pt-2 border-t">
+                <p className="text-sm text-muted-foreground pt-2">Custom Question:</p>
                 <Textarea
-                  placeholder="Ask a custom question about this repository. E.g., What are the main dependencies? Is this suitable for production?"
+                  placeholder="Ask your own question about this repository..."
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
-                  className="min-h-[100px]"
+                  className="min-h-[80px] resize-none"
                   disabled={loading}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
