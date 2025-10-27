@@ -7,7 +7,6 @@ import { Loader2, Send, Sparkles, ExternalLink, Lightbulb, Target, Brain, Zap } 
 import { useRepositoryAnalysis } from "@/hooks/useRepositoryAnalysis";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Repository {
   id: number;
@@ -183,72 +182,69 @@ export const RepositoryDetailsDialog = ({
             <div className="space-y-4">
               <h4 className="font-semibold">Ask AI about this Repository</h4>
               
-              <Tabs defaultValue="presets" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="presets">Preset Prompts</TabsTrigger>
-                  <TabsTrigger value="custom">Custom Question</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="presets" className="mt-4">
-                  <ScrollArea className="h-[280px] pr-3">
-                    <div className="grid gap-3">
-                      {PRESET_PROMPTS.map((preset) => {
-                        const Icon = preset.icon;
-                        return (
-                          <Card 
-                            key={preset.id}
-                            className="cursor-pointer hover:bg-accent/50 hover:border-primary/40 transition-all duration-200 hover:shadow-sm"
-                            onClick={() => !loading && handlePresetClick(preset.prompt)}
-                          >
-                            <CardHeader className="p-4">
-                              <CardTitle className="text-sm flex items-center gap-2">
-                                <Icon className="w-4 h-4 text-primary" />
-                                {preset.title}
-                              </CardTitle>
-                              <CardDescription className="text-xs">
-                                {preset.description}
-                              </CardDescription>
-                            </CardHeader>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-                
-                <TabsContent value="custom" className="space-y-3 mt-4">
-                  <Textarea
-                    placeholder="Ask a custom question about this repository. E.g., What are the main dependencies? Is this suitable for production?"
-                    value={customPrompt}
-                    onChange={(e) => setCustomPrompt(e.target.value)}
-                    className="min-h-[100px]"
-                    disabled={loading}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                        handleAskAI();
-                      }
-                    }}
-                  />
-                  <Button
-                    onClick={() => handleAskAI()}
-                    disabled={loading || !customPrompt.trim()}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Analyzing...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 mr-2" />
-                        Ask AI
-                      </>
-                    )}
-                  </Button>
-                </TabsContent>
-              </Tabs>
+              {/* Preset Prompts */}
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">Quick Analysis Options:</p>
+                <ScrollArea className="h-[240px] pr-3">
+                  <div className="grid gap-3">
+                    {PRESET_PROMPTS.map((preset) => {
+                      const Icon = preset.icon;
+                      return (
+                        <Card 
+                          key={preset.id}
+                          className="cursor-pointer hover:bg-accent/50 hover:border-primary/40 transition-all duration-200 hover:shadow-sm"
+                          onClick={() => !loading && handlePresetClick(preset.prompt)}
+                        >
+                          <CardHeader className="p-4">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                              <Icon className="w-4 h-4 text-primary" />
+                              {preset.title}
+                            </CardTitle>
+                            <CardDescription className="text-xs">
+                              {preset.description}
+                            </CardDescription>
+                          </CardHeader>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              {/* Custom Question Section */}
+              <div className="space-y-3 pt-2">
+                <p className="text-sm text-muted-foreground">Or ask a custom question:</p>
+                <Textarea
+                  placeholder="Ask a custom question about this repository. E.g., What are the main dependencies? Is this suitable for production?"
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  className="min-h-[100px]"
+                  disabled={loading}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                      handleAskAI();
+                    }
+                  }}
+                />
+                <Button
+                  onClick={() => handleAskAI()}
+                  disabled={loading || !customPrompt.trim()}
+                  className="w-full"
+                  size="lg"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Ask AI
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </ScrollArea>
