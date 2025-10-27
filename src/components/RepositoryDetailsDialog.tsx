@@ -124,8 +124,8 @@ export const RepositoryDetailsDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 pr-4">
-          <div className="space-y-6">
+        <ScrollArea className="flex-1 pr-4 h-[600px]">
+          <div className="space-y-6 pr-2">
             {/* Repository Info */}
             <div className="space-y-3">
               {repository.description && (
@@ -156,16 +156,18 @@ export const RepositoryDetailsDialog = ({
 
             {/* Analysis Display */}
             {analysis && (
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                <h4 className="font-semibold text-sm flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  AI Analysis
+              <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-lg p-4 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <h4 className="font-semibold flex items-center gap-2 text-primary">
+                  <Sparkles className="w-5 h-5" />
+                  AI Analysis Results
                 </h4>
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {analysis}
-                  </p>
-                </div>
+                <ScrollArea className="max-h-[300px] pr-3">
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                      {analysis}
+                    </p>
+                  </div>
+                </ScrollArea>
               </div>
             )}
 
@@ -185,29 +187,31 @@ export const RepositoryDetailsDialog = ({
                   <TabsTrigger value="custom">Custom Question</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="presets" className="space-y-3 mt-4">
-                  <div className="grid gap-3">
-                    {PRESET_PROMPTS.map((preset) => {
-                      const Icon = preset.icon;
-                      return (
-                        <Card 
-                          key={preset.id}
-                          className="cursor-pointer hover:bg-accent/50 transition-colors"
-                          onClick={() => !loading && handlePresetClick(preset.prompt)}
-                        >
-                          <CardHeader className="p-4">
-                            <CardTitle className="text-sm flex items-center gap-2">
-                              <Icon className="w-4 h-4" />
-                              {preset.title}
-                            </CardTitle>
-                            <CardDescription className="text-xs">
-                              {preset.description}
-                            </CardDescription>
-                          </CardHeader>
-                        </Card>
-                      );
-                    })}
-                  </div>
+                <TabsContent value="presets" className="mt-4">
+                  <ScrollArea className="h-[280px] pr-3">
+                    <div className="grid gap-3">
+                      {PRESET_PROMPTS.map((preset) => {
+                        const Icon = preset.icon;
+                        return (
+                          <Card 
+                            key={preset.id}
+                            className="cursor-pointer hover:bg-accent/50 hover:border-primary/40 transition-all duration-200 hover:shadow-sm"
+                            onClick={() => !loading && handlePresetClick(preset.prompt)}
+                          >
+                            <CardHeader className="p-4">
+                              <CardTitle className="text-sm flex items-center gap-2">
+                                <Icon className="w-4 h-4 text-primary" />
+                                {preset.title}
+                              </CardTitle>
+                              <CardDescription className="text-xs">
+                                {preset.description}
+                              </CardDescription>
+                            </CardHeader>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
                 </TabsContent>
                 
                 <TabsContent value="custom" className="space-y-3 mt-4">
