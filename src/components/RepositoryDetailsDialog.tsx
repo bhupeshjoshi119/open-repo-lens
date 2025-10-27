@@ -104,28 +104,30 @@ export const RepositoryDetailsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <span className="truncate">{repository.full_name}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-              className="shrink-0"
-            >
-              <a href={repository.html_url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </Button>
-          </DialogTitle>
-          <DialogDescription>
-            Analyze repository issues and architecture with AI-powered insights
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
+        <div className="p-6 pb-4">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <span className="truncate">{repository.full_name}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                className="shrink-0"
+              >
+                <a href={repository.html_url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </Button>
+            </DialogTitle>
+            <DialogDescription>
+              Analyze repository issues and architecture with AI-powered insights
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
-        <ScrollArea className="flex-1 pr-4 h-[600px]">
-          <div className="space-y-6 pr-2">
+        <ScrollArea className="flex-1 px-6 h-[600px]">
+          <div className="space-y-6 pr-3 pb-6">
             {/* Repository Info */}
             <div className="space-y-3">
               {repository.description && (
