@@ -3,9 +3,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, Sparkles, ExternalLink } from "lucide-react";
+import { Loader2, Send, Sparkles, ExternalLink, FileText } from "lucide-react";
 import { useRepositoryAnalysis } from "@/hooks/useRepositoryAnalysis";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { IssueAnalysisDisplay } from "./IssueAnalysisDisplay";
 
 interface Repository {
   id: number;
@@ -35,6 +36,7 @@ export const RepositoryDetailsDialog = ({
   onOpenChange,
 }: RepositoryDetailsDialogProps) => {
   const [customPrompt, setCustomPrompt] = useState("");
+  const [isComprehensive, setIsComprehensive] = useState(false);
   const { analyzeRepository, analysis, loading, error, clearAnalysis } = useRepositoryAnalysis();
 
   const handleAskAI = async () => {
@@ -43,14 +45,22 @@ export const RepositoryDetailsDialog = ({
     const queryPrompt = customPrompt.trim();
     
     if (queryPrompt) {
+      setIsComprehensive(false);
       await analyzeRepository(repository, queryPrompt);
       setCustomPrompt("");
     }
   };
 
+  const handleComprehensiveAnalysis = async () => {
+    if (!repository) return;
+    setIsComprehensive(true);
+    await analyzeRepository(repository);
+  };
+
   const handleClose = () => {
     clearAnalysis();
     setCustomPrompt("");
+    setIsComprehensive(false);
     onOpenChange(false);
   };
 
@@ -112,18 +122,27 @@ export const RepositoryDetailsDialog = ({
 
             {/* Analysis Display */}
             {analysis && (
-              <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-lg p-4 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                <h4 className="font-semibold flex items-center gap-2 text-primary">
-                  <Sparkles className="w-5 h-5" />
-                  AI Analysis Results
-                </h4>
-                <ScrollArea className="max-h-[300px] pr-3">
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {analysis}
-                    </p>
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <h4 className="font-semibold text-primary">
+                    {isComprehensive ? "Comprehensive Issue Analysis" : "AI Analysis Results"}
+                  </h4>
+                </div>
+                
+                {isComprehensive ? (
+                  <IssueAnalysisDisplay analysis={analysis} />
+                ) : (
+                  <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-lg p-4">
+                    <ScrollArea className="max-h-[300px] pr-3">
+                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                          {analysis}
+                        </p>
+                      </div>
+                    </ScrollArea>
                   </div>
-                </ScrollArea>
+                )}
               </div>
             )}
 
@@ -137,12 +156,41 @@ export const RepositoryDetailsDialog = ({
             <div className="space-y-4">
               <h4 className="font-semibold">Ask AI about this Repository</h4>
               
+              {/* Comprehensive Analysis Button */}
+              <Button
+                onClick={handleComprehensiveAnalysis}
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+                size="lg"
+              >
+                {loading && isComprehensive ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Analyzing All Issues...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-4 h-4 mr-2" />
+                    Generate Comprehensive Issue Documentation
+                  </>
+                )}
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Or ask a custom question</span>
+                </div>
+              </div>
+              
               <div className="space-y-3">
                 <Textarea
                   placeholder="Ask your question about this repository..."
                   value={customPrompt}
                   onChange={(e) => setCustomPrompt(e.target.value)}
-                  className="min-h-[100px] resize-none"
+                  className="min-h-[80px] resize-none"
                   disabled={loading}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -155,8 +203,9 @@ export const RepositoryDetailsDialog = ({
                   disabled={loading || !customPrompt.trim()}
                   className="w-full"
                   size="lg"
+                  variant="outline"
                 >
-                  {loading ? (
+                  {loading && !isComprehensive ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       Analyzing...

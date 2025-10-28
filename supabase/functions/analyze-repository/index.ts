@@ -18,36 +18,54 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Fetch real GitHub issues
+    // Fetch ALL GitHub issues with pagination
+    let allIssues: any[] = [];
     let issuesContext = "";
+    
     try {
-      const issuesResponse = await fetch(
-        `https://api.github.com/repos/${repository.full_name}/issues?state=open&per_page=20&sort=created&direction=desc`,
-        {
-          headers: {
-            "Accept": "application/vnd.github.v3+json",
-            "User-Agent": "Lovable-Repository-Analyzer"
+      let page = 1;
+      const perPage = 100;
+      let hasMore = true;
+      
+      // Fetch all issues (max 500 to avoid timeout)
+      while (hasMore && allIssues.length < 500) {
+        const issuesResponse = await fetch(
+          `https://api.github.com/repos/${repository.full_name}/issues?state=open&per_page=${perPage}&page=${page}&sort=created&direction=desc`,
+          {
+            headers: {
+              "Accept": "application/vnd.github.v3+json",
+              "User-Agent": "Lovable-Repository-Analyzer"
+            }
           }
-        }
-      );
+        );
 
-      if (issuesResponse.ok) {
-        const issues = await issuesResponse.json();
-        if (issues && issues.length > 0) {
-          issuesContext = "\n\nRecent Open Issues:\n" + issues
-            .filter((issue: any) => !issue.pull_request)
-            .slice(0, 15)
-            .map((issue: any, idx: number) => `
-${idx + 1}. Issue #${issue.number}: ${issue.title}
-   Author: ${issue.user?.login || "Unknown"}
+        if (issuesResponse.ok) {
+          const issues = await issuesResponse.json();
+          const filteredIssues = issues.filter((issue: any) => !issue.pull_request);
+          allIssues = [...allIssues, ...filteredIssues];
+          
+          if (issues.length < perPage) {
+            hasMore = false;
+          } else {
+            page++;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      if (allIssues.length > 0) {
+        issuesContext = `\n\nTotal Open Issues: ${allIssues.length}\n\nIssue Details:\n` + 
+          allIssues.slice(0, 50).map((issue: any, idx: number) => `
+${idx + 1}. #${issue.number}: ${issue.title}
+   Author: ${issue.user?.login}
    Created: ${issue.created_at}
    Comments: ${issue.comments}
    Labels: ${issue.labels?.map((l: any) => l.name).join(", ") || "None"}
-   Body: ${issue.body?.substring(0, 300) || "No description"}${issue.body?.length > 300 ? "..." : ""}
+   Body: ${issue.body?.substring(0, 200) || "No description"}${issue.body?.length > 200 ? "..." : ""}
 `).join("\n");
-        } else {
-          issuesContext = "\n\nNo open issues found in this repository.";
-        }
+      } else {
+        issuesContext = "\n\nNo open issues found in this repository.";
       }
     } catch (error) {
       console.error("Error fetching issues:", error);
@@ -70,14 +88,36 @@ License: ${repository.license?.name || "No license"}${issuesContext}
 
     const systemPrompt = prompt 
       ? `You are a GitHub repository analyst with expertise in software engineering, architecture, and project management. Analyze the provided repository data and issues to answer the user's question. Focus on providing deep insights, identifying patterns, and highlighting important technical or architectural considerations.`
-      : `You are a GitHub repository analyst. Provide a comprehensive summary of this repository including:
-- Main purpose and functionality
-- Technology stack and quality indicators
-- Activity and maintenance status
-- Analysis of open issues and their significance
-- Strengths and potential use cases
-- Any notable concerns or considerations
-Be concise but insightful.`;
+      : `You are an advanced GitHub repository analyst and technical documentation expert. Analyze ALL the issues comprehensively and provide:
+
+## 📊 Issue Overview
+- Total count and overall health assessment
+- Distribution across categories (bugs 🐛, features ✨, documentation 📚, performance ⚡, security 🔒)
+
+## 🎯 Priority Matrix
+Categorize issues into:
+- 🔴 CRITICAL: Security, data loss, major bugs (list top 3-5)
+- 🟠 HIGH: Significant features, important bugs (list top 3-5)
+- 🟡 MEDIUM: Enhancements, minor bugs (count)
+- 🟢 LOW: Nice-to-have, cleanup (count)
+
+## 🔍 Pattern Analysis
+- Common themes and recurring problems
+- Technical debt indicators
+- User pain points
+
+## 💡 Actionable Recommendations
+- Top 5 issues to tackle first (with issue numbers)
+- Suggested approach for each priority issue
+- Quick wins that could improve project health
+
+## 📈 Health Score
+Give a health score (0-100) based on:
+- Issue age and resolution rate
+- Critical issue count
+- Community engagement (comments, activity)
+
+Format output with clear sections, emojis, and be specific with issue numbers for actionability.`;
 
     const userMessage = prompt || `Analyze this repository:\n\n${repoContext}`;
 
