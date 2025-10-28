@@ -12,6 +12,8 @@ serve(async (req) => {
 
   try {
     const { repository, prompt } = await req.json();
+    console.log('Analyzing repository:', repository.full_name, 'with prompt:', prompt ? 'custom' : 'comprehensive');
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -23,6 +25,7 @@ serve(async (req) => {
     let issuesContext = "";
     
     try {
+      console.log('Fetching issues for:', repository.full_name);
       let page = 1;
       const perPage = 100;
       let hasMore = true;
@@ -41,6 +44,7 @@ serve(async (req) => {
 
         if (issuesResponse.ok) {
           const issues = await issuesResponse.json();
+          console.log(`Fetched ${issues.length} issues from page ${page}`);
           const filteredIssues = issues.filter((issue: any) => !issue.pull_request);
           allIssues = [...allIssues, ...filteredIssues];
           
@@ -50,20 +54,32 @@ serve(async (req) => {
             page++;
           }
         } else {
+          console.error('Failed to fetch issues:', issuesResponse.status);
           hasMore = false;
         }
       }
 
+      console.log(`Total issues fetched: ${allIssues.length}`);
+
       if (allIssues.length > 0) {
-        issuesContext = `\n\nTotal Open Issues: ${allIssues.length}\n\nIssue Details:\n` + 
-          allIssues.slice(0, 50).map((issue: any, idx: number) => `
-${idx + 1}. #${issue.number}: ${issue.title}
-   Author: ${issue.user?.login}
-   Created: ${issue.created_at}
-   Comments: ${issue.comments}
-   Labels: ${issue.labels?.map((l: any) => l.name).join(", ") || "None"}
-   Body: ${issue.body?.substring(0, 200) || "No description"}${issue.body?.length > 200 ? "..." : ""}
-`).join("\n");
+        // Create detailed issue context for AI
+        issuesContext = `\n\n=== REPOSITORY ISSUES (Total: ${allIssues.length}) ===\n\n`;
+        
+        allIssues.slice(0, 50).forEach((issue: any, idx: number) => {
+          issuesContext += `Issue #${issue.number}: ${issue.title}
+   - Author: ${issue.user?.login}
+   - Created: ${new Date(issue.created_at).toLocaleDateString()}
+   - State: ${issue.state}
+   - Comments: ${issue.comments}
+   - Labels: ${issue.labels?.map((l: any) => l.name).join(", ") || "None"}
+   - Description: ${issue.body?.substring(0, 300) || "No description"}${issue.body?.length > 300 ? "..." : ""}
+   
+`;
+        });
+        
+        if (allIssues.length > 50) {
+          issuesContext += `\n... and ${allIssues.length - 50} more issues\n`;
+        }
       } else {
         issuesContext = "\n\nNo open issues found in this repository.";
       }
@@ -87,8 +103,17 @@ License: ${repository.license?.name || "No license"}${issuesContext}
     `.trim();
 
     const systemPrompt = prompt 
-      ? `You are a GitHub repository analyst with expertise in software engineering, architecture, and project management. Analyze the provided repository data and issues to answer the user's question. Focus on providing deep insights, identifying patterns, and highlighting important technical or architectural considerations.`
-      : `You are an advanced GitHub repository analyst and technical documentation expert. Analyze ALL the issues comprehensively and provide:
+      ? `You are a GitHub repository analyst with expertise in software engineering, architecture, and project management. 
+
+The user has provided you with COMPLETE ISSUE DATA from the repository. You have access to:
+- Issue numbers, titles, authors
+- Creation dates, comment counts
+- Labels and descriptions
+
+Analyze the provided issue data and answer the user's question with specific details from the actual issues.`
+      : `You are an advanced GitHub repository analyst and technical documentation expert. You have been provided with DETAILED ISSUE DATA from the repository.
+
+Analyze ALL the issues comprehensively and provide:
 
 ## 📊 Issue Overview
 - Total count and overall health assessment
@@ -96,8 +121,8 @@ License: ${repository.license?.name || "No license"}${issuesContext}
 
 ## 🎯 Priority Matrix
 Categorize issues into:
-- 🔴 CRITICAL: Security, data loss, major bugs (list top 3-5)
-- 🟠 HIGH: Significant features, important bugs (list top 3-5)
+- 🔴 CRITICAL: Security, data loss, major bugs (list top 3-5 with issue numbers)
+- 🟠 HIGH: Significant features, important bugs (list top 3-5 with issue numbers)
 - 🟡 MEDIUM: Enhancements, minor bugs (count)
 - 🟢 LOW: Nice-to-have, cleanup (count)
 
@@ -107,7 +132,7 @@ Categorize issues into:
 - User pain points
 
 ## 💡 Actionable Recommendations
-- Top 5 issues to tackle first (with issue numbers)
+- Top 5 issues to tackle first (with specific issue numbers)
 - Suggested approach for each priority issue
 - Quick wins that could improve project health
 
@@ -117,10 +142,14 @@ Give a health score (0-100) based on:
 - Critical issue count
 - Community engagement (comments, activity)
 
-Format output with clear sections, emojis, and be specific with issue numbers for actionability.`;
+Format output with clear sections, emojis, and be SPECIFIC with issue numbers for actionability.`;
 
-    const userMessage = prompt || `Analyze this repository:\n\n${repoContext}`;
+    const userMessage = prompt 
+      ? `User Question: ${prompt}\n\nYou have access to the complete issue list below. Use it to answer the question.`
+      : `Analyze this repository and provide comprehensive issue documentation:`;
 
+    console.log('Sending request to AI with', allIssues.length, 'issues');
+    
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -136,7 +165,7 @@ Format output with clear sections, emojis, and be specific with issue numbers fo
           },
           {
             role: "user",
-            content: `${userMessage}\n\nRepository Data:\n${repoContext}`
+            content: `${userMessage}\n\n${repoContext}`
           }
         ],
       }),
