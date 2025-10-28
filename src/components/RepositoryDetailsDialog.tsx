@@ -181,33 +181,30 @@ export const RepositoryDetailsDialog = ({
             <div className="space-y-4">
               <h4 className="font-semibold">Ask AI about this Repository</h4>
               
-              {/* Preset Prompts - Compact Grid */}
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Quick Analysis:</p>
-                <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2">
-                  {PRESET_PROMPTS.map((preset) => {
-                    const Icon = preset.icon;
-                    return (
-                      <button
-                        key={preset.id}
-                        onClick={() => !loading && handlePresetClick(preset.prompt)}
-                        disabled={loading}
-                        className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 hover:border-primary/40 transition-all duration-200 hover:shadow-sm text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Icon className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                        <div className="space-y-0.5 min-w-0">
-                          <p className="text-sm font-medium leading-tight">{preset.title}</p>
-                          <p className="text-xs text-muted-foreground leading-tight">{preset.description}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+              {/* Preset Prompts */}
+              <div className="grid grid-cols-1 gap-2 max-h-[200px] overflow-y-auto pr-2">
+                {PRESET_PROMPTS.map((preset) => {
+                  const Icon = preset.icon;
+                  return (
+                    <button
+                      key={preset.id}
+                      onClick={() => !loading && handlePresetClick(preset.prompt)}
+                      disabled={loading}
+                      className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 hover:border-primary/40 transition-all duration-200 hover:shadow-sm text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Icon className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <div className="space-y-0.5 min-w-0">
+                        <p className="text-sm font-medium leading-tight">{preset.title}</p>
+                        <p className="text-xs text-muted-foreground leading-tight">{preset.description}</p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Custom Question Section - Always Visible */}
-              <div className="space-y-3 pt-2 border-t">
-                <p className="text-sm text-muted-foreground pt-2">Custom Question:</p>
+              {/* Custom Question Section */}
+              <div className="space-y-3 pt-4 border-t">
+                <p className="text-sm text-muted-foreground">Custom Question:</p>
                 <Textarea
                   placeholder="Ask your own question about this repository..."
                   value={customPrompt}
