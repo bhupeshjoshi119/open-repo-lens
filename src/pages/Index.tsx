@@ -5,7 +5,8 @@ import { FilterBar } from "@/components/FilterBar";
 import { RepositoryDetailsDialog } from "@/components/RepositoryDetailsDialog";
 import { AdvancedSearchDialog } from "@/components/AdvancedSearchDialog";
 import { RepositoryComparison } from "@/components/RepositoryComparison";
-import { Github, Sparkles, Bookmark, GitCompare } from "lucide-react";
+import { Github, Sparkles, Bookmark, GitCompare, Code2 } from "lucide-react";
+import { TechHubLogo } from "@/components/TechHubLogo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useRepositoryBookmarks } from "@/hooks/useRepositoryBookmarks";
@@ -187,9 +188,13 @@ const Index = () => {
         
         <div className="relative container mx-auto px-4 py-16 sm:py-24">
           <div className="flex flex-col items-center text-center space-y-8">
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-secondary/50 backdrop-blur-sm border border-border">
-              <Github className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Powered by GitHub API</span>
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-secondary/50 backdrop-blur-sm border border-border shadow-lg">
+              <TechHubLogo size={20} className="animate-pulse" />
+              <span className="text-sm font-medium">
+                <span className="text-foreground font-semibold">TechHub</span>
+                <span className="text-muted-foreground mx-1.5">•</span>
+                <span className="text-muted-foreground">Powered by Open Source</span>
+              </span>
             </div>
             
             <h1 className="text-4xl sm:text-6xl font-bold tracking-tight">
@@ -303,7 +308,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="max-w-md mx-auto space-y-4">
             <div className="w-20 h-20 mx-auto rounded-full bg-secondary/50 flex items-center justify-center">
-              <Github className="w-10 h-10 text-muted-foreground" />
+              <Code2 className="w-10 h-10 text-muted-foreground" />
             </div>
             <h3 className="text-xl font-semibold">Start Your Search</h3>
             <p className="text-muted-foreground">
