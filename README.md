@@ -2,7 +2,7 @@
 
 > Discover, analyze, and compare open-source projects with AI-powered insights
 
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://lovable.dev/projects/484535bc-b575-43cb-98cd-0227561f84ad)
+
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](LICENSE)
 
 ## 🚀 Features
