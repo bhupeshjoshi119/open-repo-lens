@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { githubApi } from "@/services/githubApi";
 
 interface Repository {
   id: number;
@@ -32,11 +33,31 @@ export const useRepositoryAnalysis = () => {
     setError(null);
     
     try {
+      // Extract owner and repo name from full_name
+      const [owner, repo] = repository.full_name.split('/');
+      
+      // Fetch enhanced repository data
+      let enhancedData;
+      try {
+        enhancedData = await githubApi.getRepositoryAnalysisData(owner, repo);
+      } catch (githubError) {
+        console.warn("GitHub API failed, using basic data:", githubError);
+        enhancedData = { repository, analytics: null };
+      }
+
+      // Call Supabase function with enhanced data
       const { data, error: functionError } = await supabase.functions.invoke<AnalysisResult>(
         "analyze-repository",
         {
           body: { 
-            repository,
+            repository: enhancedData.repository || repository,
+            enhancedData: enhancedData.analytics ? {
+              issues: enhancedData.issues,
+              commits: enhancedData.commits,
+              contributors: enhancedData.contributors,
+              languages: enhancedData.languages,
+              analytics: enhancedData.analytics
+            } : null,
             prompt: customPrompt 
           },
         }
