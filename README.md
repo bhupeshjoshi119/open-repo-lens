@@ -234,6 +234,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+### Update
+[New Version](https://reposcan-one.vercel.app)
+
+
 **Built with ❤️ by the TechHub team**
 
 *Discover, Analyze, and Understand the Open Source World*
