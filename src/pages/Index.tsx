@@ -10,7 +10,12 @@ import { ImageAnalysisDialog } from "@/components/ImageAnalysisDialog";
 import { PredictiveAnalysisDialog } from "@/components/PredictiveAnalysisDialog";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { NotificationCenter } from "@/components/NotificationCenter";
-import { Bookmark, Code2, Menu } from "lucide-react";
+import GitHubLogin from "@/components/GitHubLogin";
+import UserProfile from "@/components/UserProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { githubApi } from "@/services/githubApi";
+import { githubAuth } from "@/services/githubAuth";
+import { Bookmark, Code2, Menu, Loader2 } from "lucide-react";
 import { TechHubLogo } from "@/components/TechHubLogo";
 import { Button } from "@/components/ui/button";
 import { useRepositoryBookmarks } from "@/hooks/useRepositoryBookmarks";
@@ -47,6 +52,7 @@ export interface Repository {
 }
 
 const Index = () => {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
@@ -70,7 +76,7 @@ const Index = () => {
 
   const handleSearch = async (
     query: string, 
-    options?: { includeArchived?: boolean; useAI?: boolean }
+    options?: { includeArchived?: boolean; useAI?: boolean; searchMyRepos?: boolean }
   ) => {
     if (!query.trim()) {
       setRepositories([]);
@@ -83,25 +89,50 @@ const Index = () => {
       const shouldUseAI = options?.useAI !== undefined ? options.useAI : useAI;
       
       // Use AI to enhance search if enabled
-      if (shouldUseAI) {
+      if (shouldUseAI && !options?.searchMyRepos) {
         const enhanced = await enhanceSearch(query);
         if (enhanced) {
           searchQuery = enhanced.enhancedQuery;
         }
       }
       
-      // Add archived filter if not included
-      if (!options?.includeArchived && !searchQuery.includes("archived:")) {
-        searchQuery += " archived:false";
-      }
+      let results = [];
+      
+      if (options?.searchMyRepos && isAuthenticated) {
+        // Search user's repositories using GitHub Auth service
+        const { repositories: userRepos } = await import('@/hooks/useUserRepositories');
+        // For now, we'll use a simple client-side filter
+        // In a real app, you might want to implement server-side search
+        const allUserRepos = await githubAuth.getUserRepositories({
+          visibility: 'all',
+          sort: 'updated',
+          direction: 'desc',
+          per_page: 100
+        });
+        
+        results = allUserRepos.filter(repo => 
+          repo.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (repo.description && repo.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (repo.topics && repo.topics.some(topic => topic.toLowerCase().includes(searchQuery.toLowerCase())))
+        );
+      } else {
+        // Add archived filter if not included
+        if (!options?.includeArchived && !searchQuery.includes("archived:")) {
+          searchQuery += " archived:false";
+        }
 
-      const sortParam = sortBy === "stars" ? "stars" : sortBy === "updated" ? "updated" : "forks";
-      const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(searchQuery)}&sort=${sortParam}&order=desc&per_page=50`;
+        const sortParam = sortBy === "stars" ? "stars" : sortBy === "updated" ? "updated" : "forks";
+        
+        // Use authenticated GitHub API service for public search
+        const data = await githubApi.searchRepositories(searchQuery, {
+          sort: sortParam as 'stars' | 'forks' | 'help-wanted-issues' | 'updated',
+          order: 'desc',
+          per_page: 50
+        });
+        
+        results = data.items || [];
+      }
       
-      const response = await fetch(url);
-      const data = await response.json();
-      
-      const results = data.items || [];
       setRepositories(results);
       
       // Add to search history
@@ -185,6 +216,23 @@ const Index = () => {
     new Set(repositories.map(repo => repo.language).filter(Boolean))
   ) as string[];
 
+  // Show loading screen while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login screen if not authenticated
+  if (!isAuthenticated) {
+    return <GitHubLogin />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Desktop Sidebar */}
@@ -193,6 +241,10 @@ const Index = () => {
         onBookmarkClick={handleSidebarBookmarkClick}
         onImageAnalysisClick={() => setImageAnalysisOpen(true)}
         onPredictiveAnalysisClick={() => setPredictiveAnalysisOpen(true)}
+        onRepositorySelect={(repo) => {
+          setSelectedRepository(repo);
+          setDialogOpen(true);
+        }}
       />
 
       {/* Mobile Sidebar */}
@@ -266,7 +318,8 @@ const Index = () => {
             </Button>
 
             {/* Notification Center */}
-            <div className="fixed top-4 right-4 z-50">
+            <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+              <UserProfile />
               <NotificationCenter />
             </div>
 

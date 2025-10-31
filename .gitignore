@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.vercel
+
+# Environment variables and API keys
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+.env.*.local
+
+# API keys and secrets
+*.key
+*.pem
+secrets/
+config/secrets.json

@@ -466,7 +466,6 @@ export const SettingsPanel = ({ className }: SettingsPanelProps) => {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Repository data is fetched directly from GitHub. 
-                    No private repositories are accessed.
                   </p>
                 </div>
 

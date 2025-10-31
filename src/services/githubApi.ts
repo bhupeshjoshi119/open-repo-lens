@@ -58,6 +58,8 @@ interface GitHubContributor {
   contributions: number;
 }
 
+import { githubAuth } from './githubAuth';
+
 class GitHubApiService {
   private baseUrl = 'https://api.github.com';
   private token?: string;
@@ -66,19 +68,37 @@ class GitHubApiService {
     this.token = token;
   }
 
+  // Set token for authenticated requests
+  setToken(token: string) {
+    this.token = token;
+  }
+
+  // Get current token
+  getToken(): string | undefined {
+    return this.token || githubAuth.getStoredToken() || undefined;
+  }
+
   private async makeRequest<T>(endpoint: string): Promise<T> {
     const headers: Record<string, string> = {
       'Accept': 'application/vnd.github.v3+json',
       'User-Agent': 'TechHub-App'
     };
 
-    if (this.token) {
-      headers['Authorization'] = `token ${this.token}`;
+    // Use stored token if available
+    const token = this.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, { headers });
     
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication required. Please login with GitHub.');
+      }
+      if (response.status === 403) {
+        throw new Error('Access forbidden. You may not have permission to access this repository.');
+      }
       throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
     }
 

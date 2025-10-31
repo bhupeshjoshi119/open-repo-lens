@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SettingsPanel } from "./SettingsPanel";
+import MyRepositories from "./MyRepositories";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -17,17 +18,20 @@ import {
   History,
   Settings,
   Upload,
-  Brain
+  Brain,
+  GitBranch
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchHistory } from "@/hooks/useSearchHistory";
 import { useRepositoryBookmarks } from "@/hooks/useRepositoryBookmarks";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
   onSearchHistoryClick: (query: string) => void;
   onBookmarkClick: (repoId: number) => void;
   onImageAnalysisClick: () => void;
   onPredictiveAnalysisClick: () => void;
+  onRepositorySelect?: (repo: any) => void;
   className?: string;
 }
 
@@ -36,12 +40,15 @@ export const Sidebar = ({
   onBookmarkClick, 
   onImageAnalysisClick,
   onPredictiveAnalysisClick,
+  onRepositorySelect,
   className 
 }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showMyRepos, setShowMyRepos] = useState(false);
   const { history } = useSearchHistory();
   const { bookmarks } = useRepositoryBookmarks();
+  const { isAuthenticated } = useAuth();
 
   const recentHistory = history.slice(0, 5);
   const recentBookmarks = bookmarks.slice(0, 5);
@@ -51,6 +58,7 @@ export const Sidebar = ({
       title: "Quick Actions",
       items: [
         { icon: Search, label: "New Search", action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+        ...(isAuthenticated ? [{ icon: GitBranch, label: "My Repositories", action: () => setShowMyRepos(true) }] : []),
         { icon: Upload, label: "Image Analysis", action: onImageAnalysisClick },
         { icon: Brain, label: "Predictive Analysis", action: onPredictiveAnalysisClick },
         { icon: FileText, label: "Generate PDF Report", action: () => {} },
@@ -187,6 +195,26 @@ export const Sidebar = ({
               </DialogTitle>
             </DialogHeader>
             <SettingsPanel className="mt-4" />
+          </DialogContent>
+        </Dialog>
+
+        {/* My Repositories Dialog */}
+        <Dialog open={showMyRepos} onOpenChange={setShowMyRepos}>
+          <DialogContent className="max-w-4xl max-h-[90vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5" />
+                My Repositories
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="mt-4 max-h-[70vh]">
+              <MyRepositories onRepositorySelect={(repo) => {
+                if (onRepositorySelect) {
+                  onRepositorySelect(repo);
+                }
+                setShowMyRepos(false);
+              }} />
+            </ScrollArea>
           </DialogContent>
         </Dialog>
       </div>

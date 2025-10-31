@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Search, Loader2, Zap, Archive, Sparkles } from "lucide-react";
+import { Search, Loader2, Zap, Archive, Sparkles, GitBranch } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Popover,
   PopoverContent,
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/popover";
 
 interface SearchBarProps {
-  onSearch: (query: string, options?: { includeArchived?: boolean; useAI?: boolean }) => void;
+  onSearch: (query: string, options?: { includeArchived?: boolean; useAI?: boolean; searchMyRepos?: boolean }) => void;
   loading?: boolean;
   useAI?: boolean;
   onAIToggle?: () => void;
@@ -22,11 +23,13 @@ interface SearchBarProps {
 export const SearchBar = ({ onSearch, loading, useAI = true, onAIToggle, enhancement }: SearchBarProps) => {
   const [query, setQuery] = useState("");
   const [includeArchived, setIncludeArchived] = useState(false);
+  const [searchMyRepos, setSearchMyRepos] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(query, { includeArchived, useAI });
+    onSearch(query, { includeArchived, useAI, searchMyRepos });
   };
 
   return (
@@ -97,6 +100,25 @@ export const SearchBar = ({ onSearch, loading, useAI = true, onAIToggle, enhance
                     onCheckedChange={setIncludeArchived}
                   />
                 </div>
+
+                {isAuthenticated && (
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="my-repos-toggle" className="text-sm font-medium flex items-center gap-2">
+                        <GitBranch className="w-4 h-4" />
+                        Search My Repositories
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Search only your repositories (including private)
+                      </p>
+                    </div>
+                    <Switch
+                      id="my-repos-toggle"
+                      checked={searchMyRepos}
+                      onCheckedChange={setSearchMyRepos}
+                    />
+                  </div>
+                )}
               </div>
             </PopoverContent>
           </Popover>
@@ -127,6 +149,12 @@ export const SearchBar = ({ onSearch, loading, useAI = true, onAIToggle, enhance
           <Badge variant="secondary" className="gap-1.5">
             <Archive className="w-3 h-3" />
             Including Archived
+          </Badge>
+        )}
+        {searchMyRepos && isAuthenticated && (
+          <Badge variant="secondary" className="gap-1.5">
+            <GitBranch className="w-3 h-3" />
+            My Repositories
           </Badge>
         )}
         {enhancement && useAI && enhancement.filters.length > 0 && (
