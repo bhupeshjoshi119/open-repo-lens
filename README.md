@@ -236,6 +236,9 @@ This project is licensed under the BSD-3 License - revised see the [LICENSE](LIC
 
 ### Update
 [New Version](https://reposcan-one.vercel.app)
+Powered by Chrome Ai 
+[https://scanrepo.vercel.app/](https://scanrepo.vercel.app/)
+
 
 
 **Built with ❤️ by the TechHub team**
