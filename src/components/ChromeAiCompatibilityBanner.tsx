@@ -21,9 +21,18 @@ export const ChromeAiCompatibilityBanner: React.FC<ChromeAiCompatibilityBannerPr
   const [isVisible, setIsVisible] = useState(true);
   const [chromeAiStatus, setChromeAiStatus] = useState<'checking' | 'available' | 'unavailable' | 'demo'>('checking');
 
+  // All useEffect hooks must be called before any early returns
   useEffect(() => {
     checkChromeAiAvailability();
   }, []);
+
+  // Check if banner was previously dismissed
+  useEffect(() => {
+    const dismissed = localStorage.getItem('chrome-ai-banner-dismissed');
+    if (dismissed === 'true' && chromeAiStatus !== 'checking') {
+      setIsVisible(false);
+    }
+  }, [chromeAiStatus]);
 
   const checkChromeAiAvailability = async () => {
     try {
@@ -67,18 +76,10 @@ export const ChromeAiCompatibilityBanner: React.FC<ChromeAiCompatibilityBannerPr
     window.open('chrome://flags/#prompt-api-for-gemini-nano', '_blank');
   };
 
-  // Don't show if dismissed or if Chrome AI is available
+  // Early returns must come after all hooks
   if (!isVisible || chromeAiStatus === 'available') {
     return null;
   }
-
-  // Check if banner was previously dismissed
-  useEffect(() => {
-    const dismissed = localStorage.getItem('chrome-ai-banner-dismissed');
-    if (dismissed === 'true' && chromeAiStatus !== 'checking') {
-      setIsVisible(false);
-    }
-  }, [chromeAiStatus]);
 
   const getBannerContent = () => {
     switch (chromeAiStatus) {

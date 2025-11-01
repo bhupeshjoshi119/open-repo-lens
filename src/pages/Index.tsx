@@ -13,12 +13,14 @@ import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { ResearchSidebar } from "@/components/ResearchSidebar";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { ChromeAiStatus } from "@/components/ChromeAiStatus";
+import { AiFeatureShowcase } from "@/components/AiFeatureShowcase";
+import { AiNavigationMenu } from "@/components/AiNavigationMenu";
 import GitHubLogin from "@/components/GitHubLogin";
 import UserProfile from "@/components/UserProfile";
 import { useAuth } from "@/contexts/AuthContext";
 import { githubApi } from "@/services/githubApi";
 import { githubAuth } from "@/services/githubAuth";
-import { Bookmark, Code2, Menu, Loader2 } from "lucide-react";
+import { Bookmark, Code2, Menu, Loader2, Sparkles, Brain } from "lucide-react";
 import { TechHubLogo } from "@/components/TechHubLogo";
 import { Button } from "@/components/ui/button";
 import { useRepositoryBookmarks } from "@/hooks/useRepositoryBookmarks";
@@ -331,6 +333,7 @@ const Index = () => {
 
             {/* Notification Center */}
             <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+              <AiNavigationMenu variant="header" />
               <ChromeAiStatus />
               <UserProfile />
               <NotificationCenter />
@@ -371,6 +374,13 @@ const Index = () => {
             </div>
           </div>
         </div>
+
+        {/* AI Features Showcase - Show when no search results */}
+        {!loading && repositories.length === 0 && (
+          <div className="container mx-auto px-4 py-16">
+            <AiFeatureShowcase />
+          </div>
+        )}
 
         {/* Results Section */}
         {repositories.length > 0 && (
@@ -474,7 +484,7 @@ const Index = () => {
           </div>
         )}
 
-        {/* Floating Action Button for Mobile */}
+        {/* Enhanced Floating Action Button for Mobile */}
         <FloatingActionButton
           onImageAnalysisClick={() => setImageAnalysisOpen(true)}
           onPredictiveAnalysisClick={() => setPredictiveAnalysisOpen(true)}
@@ -483,6 +493,11 @@ const Index = () => {
             // This could open a mobile-friendly version or scroll to sidebar
           }}
         />
+
+        {/* Quick AI Access - Fixed position for easy access */}
+        <div className="fixed bottom-6 right-6 z-40 lg:hidden">
+          <AiNavigationMenu variant="floating" />
+        </div>
       </div>
     </div>
   );

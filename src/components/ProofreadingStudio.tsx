@@ -349,37 +349,58 @@ export const ProofreadingStudio: React.FC = () => {
                 </div>
               </TabsContent>
 
-              <TabsContent value="suggestions" className="space-y-3">
+              <TabsContent value="suggestions" className="space-y-4">
                 {result.suggestions.length > 0 ? (
                   result.suggestions.map((suggestion, index) => (
-                    <Alert key={index}>
-                      <div className="flex items-start gap-3">
+                    <Alert key={index} className="border-l-4 border-l-primary/20">
+                      <div className="flex items-start gap-4">
                         {getSuggestionIcon(suggestion.type)}
-                        <div className="flex-1">
-                          <AlertDescription>
-                            <div className="font-semibold mb-1 capitalize">
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="capitalize font-medium">
                               {suggestion.type} Issue
-                            </div>
-                            <div className="space-y-2 text-sm">
-                              <div>
-                                <span className="text-muted-foreground">Original:</span>
-                                <div className="bg-red-50 dark:bg-red-950 p-2 rounded mt-1 line-through">
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              #{index + 1}
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                                Original Text:
+                              </label>
+                              <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 p-3 rounded-md">
+                                <span className="font-mono text-sm line-through text-red-700 dark:text-red-300">
                                   {suggestion.original}
-                                </div>
+                                </span>
                               </div>
-                              <div>
-                                <span className="text-muted-foreground">Suggested:</span>
-                                <div className="bg-green-50 dark:bg-green-950 p-2 rounded mt-1">
-                                  {suggestion.suggested}
-                                </div>
-                              </div>
-                              {suggestion.explanation && (
-                                <div className="text-muted-foreground italic">
-                                  {suggestion.explanation}
-                                </div>
-                              )}
                             </div>
-                          </AlertDescription>
+                            
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                                Suggested Improvement:
+                              </label>
+                              <div className="bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-800 p-3 rounded-md">
+                                <span className="font-mono text-sm text-green-700 dark:text-green-300 font-medium">
+                                  {suggestion.suggested}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {suggestion.explanation && (
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                                  Explanation:
+                                </label>
+                                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-3 rounded-md">
+                                  <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+                                    {suggestion.explanation}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </Alert>
@@ -394,24 +415,67 @@ export const ProofreadingStudio: React.FC = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="comparison" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Original
-                    </h3>
-                    <div className="bg-red-50 dark:bg-red-950 p-4 rounded-lg min-h-[200px] text-sm whitespace-pre-wrap">
-                      {originalText}
+              <TabsContent value="comparison" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 pb-2 border-b border-red-200 dark:border-red-800">
+                      <FileText className="h-5 w-5 text-red-600" />
+                      <h3 className="font-semibold text-lg text-red-700 dark:text-red-300">
+                        Original Text
+                      </h3>
+                      <Badge variant="destructive" className="ml-auto">
+                        Before
+                      </Badge>
+                    </div>
+                    <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 p-4 rounded-lg min-h-[300px]">
+                      <pre className="font-mono text-sm text-red-800 dark:text-red-200 whitespace-pre-wrap leading-relaxed">
+                        {originalText}
+                      </pre>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold mb-2 flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      Corrected
-                    </h3>
-                    <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg min-h-[200px] text-sm whitespace-pre-wrap">
-                      {result.correctedText}
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 pb-2 border-b border-green-200 dark:border-green-800">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      <h3 className="font-semibold text-lg text-green-700 dark:text-green-300">
+                        Corrected Text
+                      </h3>
+                      <Badge variant="default" className="ml-auto bg-green-600">
+                        After
+                      </Badge>
+                    </div>
+                    <div className="bg-green-50 dark:bg-green-950/50 border border-green-200 dark:border-green-800 p-4 rounded-lg min-h-[300px]">
+                      <pre className="font-mono text-sm text-green-800 dark:text-green-200 whitespace-pre-wrap leading-relaxed font-medium">
+                        {result.correctedText}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Summary of Changes */}
+                <div className="bg-muted/50 border rounded-lg p-4">
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Summary of Changes
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-red-600">
+                        {result.metrics.grammarIssues}
+                      </div>
+                      <div className="text-muted-foreground">Grammar Issues Fixed</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {result.metrics.styleIssues}
+                      </div>
+                      <div className="text-muted-foreground">Style Improvements</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {result.metrics.readabilityScore}
+                      </div>
+                      <div className="text-muted-foreground">Readability Score</div>
                     </div>
                   </div>
                 </div>
