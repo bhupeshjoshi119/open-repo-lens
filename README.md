@@ -262,7 +262,9 @@ This project is built with [Lovable](https://lovable.dev), an AI-powered develop
 - [GitHub API Docs](https://docs.github.com/en/rest)
 - [Chrome AI Docs](https://developer.chrome.com/docs/ai/built-in)
 - [Supabase Documentation](https://supabase.com/docs)
-
+  
+## 📚 Deployed:
+[scanrepo](https://scanrepo.vercel.app/)
 ## 📄 License
 
 Built with [Lovable](https://lovable.dev) - AI-powered development platform
