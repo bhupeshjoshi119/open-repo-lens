@@ -1,10 +1,10 @@
-# RepoLens - GitHub Repository Discovery & AI Text Processing
+# TechHub - Powered by Open Source
 
 A powerful web application for discovering, analyzing, and exploring GitHub repositories, combined with cutting-edge on-device AI tools powered by Chrome's Gemini Nano.
 
 ## 🚀 What Does This Application Do?
 
-RepoLens is a comprehensive platform that combines two powerful features:
+TechHub is a comprehensive platform that combines two powerful features:
 
 ### 1. **GitHub Repository Search & Analysis**
 - **Advanced Search**: Find GitHub repositories with intelligent AI-powered search enhancement
@@ -197,13 +197,7 @@ To use the AI Text Processing tools:
   - Text never leaves your browser
   - No API keys or accounts needed
 
-## 🚢 Deployment
 
-Deploy with one click using Lovable:
-
-1. Open [Lovable Project](https://lovable.dev/projects/484535bc-b575-43cb-98cd-0227561f84ad)
-2. Click Share → Publish
-3. Your app is live!
 
 ### Custom Domain
 
@@ -272,10 +266,6 @@ This project is built with [Lovable](https://lovable.dev), an AI-powered develop
 ## 📄 License
 
 Built with [Lovable](https://lovable.dev) - AI-powered development platform
-
-## 🔗 Project Links
-
-**Lovable Project**: https://lovable.dev/projects/484535bc-b575-43cb-98cd-0227561f84ad
 
 ---
 

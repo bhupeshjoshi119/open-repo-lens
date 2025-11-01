@@ -10,9 +10,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User as UserIcon, Sparkles, Github } from "lucide-react";
+import { LogOut, User as UserIcon, Sparkles } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { TechHubLogo } from "./TechHubLogo";
 import type { User, Session } from "@supabase/supabase-js";
 
 export const Header = () => {
@@ -69,9 +70,13 @@ export const Header = () => {
     <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-            <Github className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg">RepoLens</span>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate("/")}>
+            <TechHubLogo size={28} className="text-primary" />
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-lg text-foreground">TechHub</span>
+              <span className="text-sm text-muted-foreground">•</span>
+              <span className="text-sm text-muted-foreground">Powered by Open Source</span>
+            </div>
           </div>
           <nav className="flex items-center gap-1">
             <Button

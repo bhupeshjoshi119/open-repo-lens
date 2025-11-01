@@ -6,7 +6,9 @@ import { RepositoryDetailsDialog } from "@/components/RepositoryDetailsDialog";
 import { AdvancedSearchDialog } from "@/components/AdvancedSearchDialog";
 import { RepositoryComparison } from "@/components/RepositoryComparison";
 import { Header } from "@/components/Header";
-import { Github, Sparkles, Bookmark, GitCompare } from "lucide-react";
+import { Sparkles, Bookmark, GitCompare } from "lucide-react";
+import { CodeIcon } from "@/components/icons/CodeIcon";
+import { RepositoryIcon } from "@/components/icons/RepositoryIcon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useRepositoryBookmarks } from "@/hooks/useRepositoryBookmarks";
@@ -190,8 +192,8 @@ const Index = () => {
         <div className="relative container mx-auto px-4 py-16 sm:py-24">
           <div className="flex flex-col items-center text-center space-y-8">
             <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-secondary/50 backdrop-blur-sm border border-border">
-              <Github className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Powered by GitHub API</span>
+              <CodeIcon className="text-primary" size={20} />
+              <span className="text-sm font-medium text-muted-foreground">Powered by Open Source</span>
             </div>
             
             <h1 className="text-4xl sm:text-6xl font-bold tracking-tight">
@@ -305,7 +307,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-20 text-center">
           <div className="max-w-md mx-auto space-y-4">
             <div className="w-20 h-20 mx-auto rounded-full bg-secondary/50 flex items-center justify-center">
-              <Github className="w-10 h-10 text-muted-foreground" />
+              <RepositoryIcon className="text-muted-foreground" size={40} />
             </div>
             <h3 className="text-xl font-semibold">Start Your Search</h3>
             <p className="text-muted-foreground">

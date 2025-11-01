@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Github } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { TechHubLogo } from "@/components/TechHubLogo";
+import { CodeIcon } from "@/components/icons/CodeIcon";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -61,10 +62,13 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome to RepoLens</CardTitle>
+        <CardHeader className="space-y-4">
+          <div className="flex justify-center">
+            <TechHubLogo size={48} className="text-primary" />
+          </div>
+          <CardTitle className="text-2xl font-bold text-center">Welcome to TechHub</CardTitle>
           <CardDescription className="text-center">
-            Sign in with GitHub to analyze your repositories and contribute to open source projects
+            Powered by Open Source • Sign in with GitHub to discover and analyze repositories
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -74,7 +78,7 @@ const Auth = () => {
             size="lg"
             variant="default"
           >
-            <Github className="mr-2 h-5 w-5" />
+            <CodeIcon className="mr-2" size={20} />
             Continue with GitHub
           </Button>
           
