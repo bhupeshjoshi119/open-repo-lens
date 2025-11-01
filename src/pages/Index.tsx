@@ -5,11 +5,14 @@ import { FilterBar } from "@/components/FilterBar";
 import { RepositoryDetailsDialog } from "@/components/RepositoryDetailsDialog";
 import { AdvancedSearchDialog } from "@/components/AdvancedSearchDialog";
 import { RepositoryComparison } from "@/components/RepositoryComparison";
+import { RepositoryHealthDashboard } from "@/components/RepositoryHealthDashboard";
 import { Sidebar } from "@/components/Sidebar";
 import { ImageAnalysisDialog } from "@/components/ImageAnalysisDialog";
 import { PredictiveAnalysisDialog } from "@/components/PredictiveAnalysisDialog";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
+import { ResearchSidebar } from "@/components/ResearchSidebar";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { ChromeAiStatus } from "@/components/ChromeAiStatus";
 import GitHubLogin from "@/components/GitHubLogin";
 import UserProfile from "@/components/UserProfile";
 import { useAuth } from "@/contexts/AuthContext";
@@ -100,7 +103,7 @@ const Index = () => {
       
       if (options?.searchMyRepos && isAuthenticated) {
         // Search user's repositories using GitHub Auth service
-        const { repositories: userRepos } = await import('@/hooks/useUserRepositories');
+        const { useUserRepositories } = await import('@/hooks/useUserRepositories');
         // For now, we'll use a simple client-side filter
         // In a real app, you might want to implement server-side search
         const allUserRepos = await githubAuth.getUserRepositories({
@@ -241,6 +244,9 @@ const Index = () => {
         onBookmarkClick={handleSidebarBookmarkClick}
         onImageAnalysisClick={() => setImageAnalysisOpen(true)}
         onPredictiveAnalysisClick={() => setPredictiveAnalysisOpen(true)}
+        onResearchSimplifierClick={() => {
+          // Research Simplifier is now handled within the Sidebar component
+        }}
         onRepositorySelect={(repo) => {
           setSelectedRepository(repo);
           setDialogOpen(true);
@@ -266,6 +272,9 @@ const Index = () => {
               }}
               onPredictiveAnalysisClick={() => {
                 setPredictiveAnalysisOpen(true);
+                setMobileSidebarOpen(false);
+              }}
+              onResearchSimplifierClick={() => {
                 setMobileSidebarOpen(false);
               }}
               className="relative border-0"
@@ -299,8 +308,11 @@ const Index = () => {
         repository={selectedRepository}
       />
 
+      {/* Research Sidebar */}
+      <ResearchSidebar />
+
       {/* Main Content */}
-      <div className="lg:ml-80 transition-all duration-300">
+      <div className="lg:ml-80 lg:mr-80 transition-all duration-300">
         {/* Hero Section */}
         <div className="relative overflow-hidden border-b border-border bg-gradient-to-br from-background via-background to-secondary/20">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsla(239,84%,67%,0.15),transparent_50%)]" />
@@ -319,6 +331,7 @@ const Index = () => {
 
             {/* Notification Center */}
             <div className="fixed top-4 right-4 z-50 flex items-center gap-2">
+              <ChromeAiStatus />
               <UserProfile />
               <NotificationCenter />
             </div>
@@ -362,6 +375,13 @@ const Index = () => {
         {/* Results Section */}
         {repositories.length > 0 && (
           <div className="container mx-auto px-4 py-12">
+            {/* Repository Health Dashboard - Surprise Feature! */}
+            {repositories.length >= 3 && (
+              <div className="mb-8">
+                <RepositoryHealthDashboard repositories={repositories} />
+              </div>
+            )}
+            
             <div className="flex items-center justify-between mb-6">
               <div className="text-sm text-muted-foreground">
                 Found {filteredRepositories.length} repositories
@@ -458,6 +478,10 @@ const Index = () => {
         <FloatingActionButton
           onImageAnalysisClick={() => setImageAnalysisOpen(true)}
           onPredictiveAnalysisClick={() => setPredictiveAnalysisOpen(true)}
+          onResearchSimplifierClick={() => {
+            // Research Simplifier can be accessed via the right sidebar
+            // This could open a mobile-friendly version or scroll to sidebar
+          }}
         />
       </div>
     </div>

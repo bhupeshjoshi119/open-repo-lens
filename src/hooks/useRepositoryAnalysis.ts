@@ -72,6 +72,18 @@ export const useRepositoryAnalysis = () => {
       }
 
       setAnalysis(data.analysis);
+      
+      // Dispatch success notification
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('analysis-complete', {
+          detail: {
+            repository: repository.full_name,
+            type: customPrompt ? 'custom' : 'comprehensive',
+            timestamp: new Date().toISOString()
+          }
+        }));
+      }
+      
       return data.analysis;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to analyze repository";

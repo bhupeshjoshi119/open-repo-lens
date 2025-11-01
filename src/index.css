@@ -63,3 +63,10 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Simple Chrome size fix */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  html {
+    zoom: 0.9;
+  }
+}

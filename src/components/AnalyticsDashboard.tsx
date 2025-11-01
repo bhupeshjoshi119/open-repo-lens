@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CustomScrollArea } from "@/components/ui/custom-scrollbar";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -285,7 +285,7 @@ export const AnalyticsDashboard = ({
         ))}
       </div>
 
-      <ScrollArea className="h-[500px]">
+      <CustomScrollArea className="h-[500px]">
         {activeTab === "overview" && (
           <div className="space-y-6">
             {/* Health Score */}
@@ -641,7 +641,7 @@ export const AnalyticsDashboard = ({
             </div>
           </div>
         )}
-      </ScrollArea>
+      </CustomScrollArea>
     </div>
   );
 };

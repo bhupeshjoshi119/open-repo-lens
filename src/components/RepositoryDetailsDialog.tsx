@@ -3,12 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Send, Sparkles, ExternalLink, FileText, Image, TrendingUp } from "lucide-react";
+import { Loader2, Send, Sparkles, ExternalLink, FileText, TrendingUp } from "lucide-react";
 import { useRepositoryAnalysis } from "@/hooks/useRepositoryAnalysis";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CustomScrollArea } from "@/components/ui/custom-scrollbar";
 import { IssueAnalysisDisplay } from "./IssueAnalysisDisplay";
 import { PDFReportGenerator } from "./PDFReportGenerator";
 import { AnalysisSidebar } from "./AnalysisSidebar";
+import { GitHubReportViewer } from "./GitHubReportViewer";
+import { AiRepositoryAnalyzer } from "./AiRepositoryAnalyzer";
 
 interface Repository {
   id: number;
@@ -71,6 +73,8 @@ export const RepositoryDetailsDialog = ({
     setShowSidebar(true);
     onOpenChange(false);
   };
+
+
 
   const handleGenerateReport = async () => {
     if (!repository || !analysis) return;
@@ -144,7 +148,14 @@ export const RepositoryDetailsDialog = ({
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            <ScrollArea className="flex-1 p-6">
+            <div className="px-6 pt-4 pb-2 border-b border-border">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold text-primary">Repository Analysis</h3>
+              </div>
+            </div>
+
+            <CustomScrollArea className="flex-1 p-6">
               <div className="space-y-6 pr-3 pb-6">
                 {/* Repository Info */}
                 <div className="space-y-3">
@@ -174,29 +185,28 @@ export const RepositoryDetailsDialog = ({
                   )}
                 </div>
 
+                {/* Chrome AI Repository Analyzer */}
+                <AiRepositoryAnalyzer repository={repository} className="mb-6" />
+
                 {/* Analysis Display */}
                 {analysis && (
                   <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 space-y-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Sparkles className="w-5 h-5 text-primary" />
-                      <h4 className="font-semibold text-primary">
-                        {isComprehensive ? "Comprehensive Issue Analysis" : "AI Analysis Results"}
-                      </h4>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-primary" />
+                        <h4 className="font-semibold text-primary">
+                          {isComprehensive ? "Comprehensive Repository Analysis" : "AI Analysis Results"}
+                        </h4>
+                      </div>
+                      <Badge variant="secondary" className="bg-gradient-to-r from-primary/10 to-accent/10">
+                        Analysis Complete
+                      </Badge>
                     </div>
                     
-                    {isComprehensive ? (
-                      <IssueAnalysisDisplay analysis={analysis} />
-                    ) : (
-                      <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-lg p-4">
-                        <ScrollArea className="max-h-[300px] pr-3">
-                          <div className="prose prose-sm dark:prose-invert max-w-none">
-                            <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                              {analysis}
-                            </p>
-                          </div>
-                        </ScrollArea>
-                      </div>
-                    )}
+                    <GitHubReportViewer 
+                      analysis={analysis} 
+                      repository={repository}
+                    />
                   </div>
                 )}
 
@@ -215,26 +225,63 @@ export const RepositoryDetailsDialog = ({
                   />
                 )}
 
-                {/* Ask AI Section */}
-                <div className="space-y-4">
-                  <h4 className="font-semibold">Ask AI about this Repository</h4>
+                {/* Enhanced AI Analysis Section */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold text-lg">AI-Powered Repository Analysis</h4>
+                    {analysis && (
+                      <Badge variant="outline" className="text-xs">
+                        Last analyzed: {new Date().toLocaleDateString()}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  {/* Quick Analysis Insights */}
+                  {!analysis && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border border-blue-200 dark:border-blue-800">
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          <span className="text-sm font-medium text-blue-900 dark:text-blue-100">Code Quality</span>
+                        </div>
+                        <p className="text-xs text-blue-700 dark:text-blue-300">Analyze code structure, patterns, and best practices</p>
+                      </div>
+                      
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border border-green-200 dark:border-green-800">
+                        <div className="flex items-center gap-2 mb-2">
+                          <TrendingUp className="w-4 h-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-900 dark:text-green-100">Performance</span>
+                        </div>
+                        <p className="text-xs text-green-700 dark:text-green-300">Identify bottlenecks and optimization opportunities</p>
+                      </div>
+                      
+                      <div className="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border border-purple-200 dark:border-purple-800">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles className="w-4 h-4 text-purple-600" />
+                          <span className="text-sm font-medium text-purple-900 dark:text-purple-100">Architecture</span>
+                        </div>
+                        <p className="text-xs text-purple-700 dark:text-purple-300">Review system design and architectural decisions</p>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Comprehensive Analysis Button */}
                   <Button
                     onClick={handleComprehensiveAnalysis}
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-opacity"
+                    className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-200 shadow-md hover:shadow-lg focus:ring-2 focus:ring-primary/20 focus:ring-offset-2"
                     size="lg"
+                    aria-label={analysis ? "Refresh repository analysis" : "Start comprehensive repository analysis"}
                   >
                     {loading && isComprehensive ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Analyzing All Issues...
+                        <Loader2 className="w-5 h-5 mr-3 animate-spin" aria-hidden="true" />
+                        <span>Analyzing Repository...</span>
                       </>
                     ) : (
                       <>
-                        <FileText className="w-4 h-4 mr-2" />
-                        Generate Comprehensive Issue Documentation
+                        <Sparkles className="w-5 h-5 mr-3" aria-hidden="true" />
+                        <span>{analysis ? "Refresh Analysis" : "Start Comprehensive Analysis"}</span>
                       </>
                     )}
                   </Button>
@@ -244,16 +291,19 @@ export const RepositoryDetailsDialog = ({
                       <span className="w-full border-t border-border" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">Or ask a custom question</span>
+                      <span className="bg-card px-2 text-muted-foreground">Custom Analysis</span>
                     </div>
                   </div>
                   
                   <div className="space-y-3">
+                    <div className="text-sm text-muted-foreground">
+                      Ask specific questions about this repository's code, architecture, or issues:
+                    </div>
                     <Textarea
-                      placeholder="Ask your question about this repository..."
+                      placeholder="e.g., 'What are the main security vulnerabilities?', 'How can I improve performance?', 'What's the code quality score?'"
                       value={customPrompt}
                       onChange={(e) => setCustomPrompt(e.target.value)}
-                      className="min-h-[80px] resize-none"
+                      className="min-h-[100px] resize-none"
                       disabled={loading}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -261,29 +311,47 @@ export const RepositoryDetailsDialog = ({
                         }
                       }}
                     />
-                    <Button
-                      onClick={handleAskAI}
-                      disabled={loading || !customPrompt.trim()}
-                      className="w-full"
-                      size="lg"
-                      variant="outline"
-                    >
-                      {loading && !isComprehensive ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4 mr-2" />
-                          Ask AI
-                        </>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={handleAskAI}
+                        disabled={loading || !customPrompt.trim()}
+                        className="flex-1 border-primary/20 hover:bg-primary/5 hover:border-primary/30 transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:ring-offset-2"
+                        size="lg"
+                        variant="outline"
+                        aria-label="Submit custom analysis question"
+                      >
+                        {loading && !isComprehensive ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" aria-hidden="true" />
+                            <span>Analyzing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4 mr-2" aria-hidden="true" />
+                            <span>Ask AI</span>
+                          </>
+                        )}
+                      </Button>
+                      {customPrompt && (
+                        <Button
+                          onClick={() => setCustomPrompt("")}
+                          variant="ghost"
+                          size="lg"
+                          disabled={loading}
+                          className="px-6 hover:bg-muted/50 transition-colors duration-200 focus:ring-2 focus:ring-muted focus:ring-offset-2"
+                          aria-label="Clear custom prompt"
+                        >
+                          Clear
+                        </Button>
                       )}
-                    </Button>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      💡 Tip: Press Cmd/Ctrl + Enter to submit quickly
+                    </div>
                   </div>
                 </div>
               </div>
-            </ScrollArea>
+            </CustomScrollArea>
           </div>
         </div>
       </DialogContent>

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CustomScrollArea } from "@/components/ui/custom-scrollbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDropzone } from "react-dropzone";
 import {
@@ -308,7 +308,7 @@ export const ImageAnalysisDialog = ({
               )}
             </div>
 
-            <ScrollArea className="h-[500px]">
+            <CustomScrollArea className="h-[500px]">
               {loading && (
                 <Card className="p-6 text-center">
                   <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin text-primary" />
@@ -786,7 +786,7 @@ export const ImageAnalysisDialog = ({
                   </p>
                 </Card>
               )}
-            </ScrollArea>
+            </CustomScrollArea>
           </div>
         </div>
 

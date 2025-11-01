@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Search, Loader2, Zap, Archive, Sparkles, GitBranch } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Search, Loader2, Zap, Archive, Sparkles, GitBranch, Lightbulb } from "lucide-react";
+import ChromeAiService from "../services/chromeAiService";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,11 +26,62 @@ export const SearchBar = ({ onSearch, loading, useAI = true, onAIToggle, enhance
   const [includeArchived, setIncludeArchived] = useState(false);
   const [searchMyRepos, setSearchMyRepos] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [aiCapabilities, setAiCapabilities] = useState<any>(null);
   const { isAuthenticated } = useAuth();
+
+  // Check AI capabilities on mount
+  useEffect(() => {
+    const checkCapabilities = async () => {
+      try {
+        const caps = await ChromeAiService.checkAiAvailability();
+        setAiCapabilities(caps);
+      } catch (err) {
+        console.error('Failed to check AI capabilities:', err);
+      }
+    };
+    checkCapabilities();
+  }, []);
+
+  // Generate AI suggestions when query changes
+  const generateSuggestions = useCallback(async (searchQuery: string) => {
+    if (!searchQuery.trim() || !aiCapabilities?.promptApi) return;
+    
+    try {
+      const aiSuggestions = await ChromeAiService.generateSearchSuggestions(searchQuery);
+      setSuggestions(aiSuggestions);
+      setShowSuggestions(aiSuggestions.length > 0);
+    } catch (err) {
+      console.error('Failed to generate suggestions:', err);
+      setSuggestions([]);
+    }
+  }, [aiCapabilities]);
+
+  // Debounced suggestion generation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (query.length > 2 && useAI) {
+        generateSuggestions(query);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [query, useAI, generateSuggestions]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setShowSuggestions(false);
     onSearch(query, { includeArchived, useAI, searchMyRepos });
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setQuery(suggestion);
+    setShowSuggestions(false);
+    onSearch(suggestion, { includeArchived, useAI, searchMyRepos });
   };
 
   return (
@@ -43,6 +95,7 @@ export const SearchBar = ({ onSearch, loading, useAI = true, onAIToggle, enhance
             placeholder="Search repositories, users, topics, or use natural language..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-base"
           />
           
@@ -136,6 +189,31 @@ export const SearchBar = ({ onSearch, loading, useAI = true, onAIToggle, enhance
           </Button>
         </div>
       </div>
+
+      {/* AI Suggestions Dropdown */}
+      {showSuggestions && suggestions.length > 0 && (
+        <div className="relative">
+          <div className="absolute top-2 left-0 right-0 z-50 bg-card border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <div className="p-2 border-b border-border">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Lightbulb className="w-4 h-4" />
+                AI Suggestions
+              </div>
+            </div>
+            <div className="p-1">
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-md transition-colors"
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Status badges */}
       <div className="flex items-center justify-center gap-2 flex-wrap">

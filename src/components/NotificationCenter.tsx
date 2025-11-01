@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CustomScrollArea } from "@/components/ui/custom-scrollbar";
 import { 
   Bell, 
   CheckCircle2, 
@@ -233,7 +233,7 @@ export const NotificationCenter = ({ className }: NotificationCenterProps) => {
             </div>
           </div>
 
-          <ScrollArea className="max-h-80">
+          <CustomScrollArea className="max-h-80">
             {notifications.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
                 <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -312,7 +312,7 @@ export const NotificationCenter = ({ className }: NotificationCenterProps) => {
                 ))}
               </div>
             )}
-          </ScrollArea>
+          </CustomScrollArea>
         </Card>
       )}
     </div>

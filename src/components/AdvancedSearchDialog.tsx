@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CustomScrollArea } from "@/components/ui/custom-scrollbar";
 import { Separator } from "@/components/ui/separator";
 import { useSearchHistory } from "@/hooks/useSearchHistory";
 
@@ -147,7 +147,7 @@ export const AdvancedSearchDialog = ({
                   <History className="w-4 h-4 text-muted-foreground" />
                   <h3 className="text-sm font-medium">Recent Searches</h3>
                 </div>
-                <ScrollArea className="h-[200px]">
+                <CustomScrollArea className="h-[200px]">
                   <div className="space-y-2">
                     {history.slice(0, 10).map((item) => (
                       <div
@@ -175,7 +175,7 @@ export const AdvancedSearchDialog = ({
                       </div>
                     ))}
                   </div>
-                </ScrollArea>
+                </CustomScrollArea>
               </div>
             )}
 

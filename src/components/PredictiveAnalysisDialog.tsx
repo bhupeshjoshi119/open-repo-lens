@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CustomScrollArea } from "@/components/ui/custom-scrollbar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -174,7 +174,7 @@ export const PredictiveAnalysisDialog = ({
           <div className="lg:col-span-2 space-y-4">
             <h3 className="font-semibold">Prediction Results</h3>
             
-            <ScrollArea className="h-[600px]">
+            <CustomScrollArea className="h-[600px]">
               {loading && (
                 <Card className="p-8 text-center">
                   <Loader2 className="w-12 h-12 mx-auto mb-4 animate-spin text-primary" />
@@ -310,7 +310,7 @@ export const PredictiveAnalysisDialog = ({
                   </p>
                 </Card>
               )}
-            </ScrollArea>
+            </CustomScrollArea>
           </div>
         </div>
       </DialogContent>

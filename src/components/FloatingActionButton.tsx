@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
-  Plus, 
   Image, 
   Brain, 
   FileText, 
@@ -9,21 +8,36 @@ import {
   Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getChromeButtonClasses, getChromeButtonStyle } from "@/utils/browserUtils";
 
 interface FloatingActionButtonProps {
   onImageAnalysisClick: () => void;
   onPredictiveAnalysisClick: () => void;
+  onResearchSimplifierClick?: () => void;
   className?: string;
 }
 
 export const FloatingActionButton = ({
   onImageAnalysisClick,
   onPredictiveAnalysisClick,
+  onResearchSimplifierClick,
   className
 }: FloatingActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const actions = [
+    {
+      icon: Sparkles,
+      label: "AI Repository Analysis",
+      action: () => {
+        // Trigger repository analysis for the most recent repo
+        if (onResearchSimplifierClick) {
+          onResearchSimplifierClick();
+        }
+        setIsOpen(false);
+      },
+      color: "bg-gradient-to-r from-primary to-accent hover:opacity-90"
+    },
     {
       icon: Image,
       label: "Image Analysis",
@@ -31,25 +45,30 @@ export const FloatingActionButton = ({
         onImageAnalysisClick();
         setIsOpen(false);
       },
-      color: "bg-blue-500 hover:bg-blue-600"
+      color: "bg-gradient-to-r from-blue-500 to-cyan-500 hover:opacity-90"
     },
     {
       icon: Brain,
-      label: "Predictive Analysis", 
+      label: "Predictive Insights", 
       action: () => {
         onPredictiveAnalysisClick();
         setIsOpen(false);
       },
-      color: "bg-purple-500 hover:bg-purple-600"
+      color: "bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90"
     },
     {
       icon: FileText,
-      label: "Generate Report",
+      label: "Quick PDF Report",
       action: () => {
-        // This will be handled by the repository dialog
+        // Dispatch event for quick PDF generation
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('quick-pdf-request', {
+            detail: { source: 'floating-action-button' }
+          }));
+        }
         setIsOpen(false);
       },
-      color: "bg-green-500 hover:bg-green-600"
+      color: "bg-gradient-to-r from-green-500 to-emerald-500 hover:opacity-90"
     }
   ];
 
@@ -69,13 +88,15 @@ export const FloatingActionButton = ({
             </div>
             <Button
               size="icon"
-              className={cn(
-                "h-12 w-12 rounded-full shadow-lg transition-all duration-200",
+              className={getChromeButtonClasses(cn(
+                "h-10 w-10 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 focus:ring-4 focus:ring-white/20 focus:ring-offset-2",
                 action.color
-              )}
+              ))}
               onClick={action.action}
+              aria-label={action.label}
+              style={getChromeButtonStyle('icon')}
             >
-              <action.icon className="h-5 w-5 text-white" />
+              <action.icon className="h-4 w-4 text-white" aria-hidden="true" />
             </Button>
           </div>
         ))}
@@ -84,17 +105,28 @@ export const FloatingActionButton = ({
       {/* Main FAB */}
       <Button
         size="icon"
-        className={cn(
-          "h-14 w-14 rounded-full shadow-lg transition-all duration-300 ease-in-out",
-          "bg-gradient-to-r from-primary to-accent hover:shadow-xl hover:scale-105",
+        className={getChromeButtonClasses(cn(
+          "h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 focus:ring-4 focus:ring-primary/20 focus:ring-offset-2",
+          "bg-gradient-to-r from-primary to-accent",
           isOpen && "rotate-45"
-        )}
+        ))}
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? "Close quick actions menu" : "Open quick actions menu"}
+        aria-expanded={isOpen}
+        style={{
+          ...getChromeButtonStyle('icon'),
+          height: '3rem',
+          width: '3rem',
+          minHeight: '3rem',
+          maxHeight: '3rem',
+          minWidth: '3rem',
+          maxWidth: '3rem'
+        }}
       >
         {isOpen ? (
-          <X className="h-6 w-6 text-white" />
+          <X className="h-5 w-5 text-white" aria-hidden="true" />
         ) : (
-          <Sparkles className="h-6 w-6 text-white" />
+          <Sparkles className="h-5 w-5 text-white" aria-hidden="true" />
         )}
       </Button>
     </div>

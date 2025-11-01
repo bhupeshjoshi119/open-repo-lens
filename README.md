@@ -4,6 +4,15 @@ A powerful, AI-driven platform for discovering, analyzing, and understanding ope
 
 ## 🚀 New Features
 
+### 📝 AI Proofreading Studio ⭐ NEW & EXPERIMENTAL!
+- **Advanced Grammar Checking**: Real-time AI-powered proofreading with Chrome's Proofreader API
+- **Side-by-Side Comparison**: Original vs corrected text with color-coded highlighting
+- **Detailed Metrics**: Readability score, grammar issues, and style improvements
+- **Professional PDF Export**: Generate comprehensive proofreading reports with explanations
+- **Privacy-First**: All processing happens locally in your browser
+- **Issue Categorization**: Grammar, style, clarity, and word-choice suggestions
+- **Learn as You Write**: Detailed explanations for every correction
+
 ### 🎨 Smooth Sidebar Navigation
 - **Desktop**: Fixed sidebar with collapsible functionality
 - **Mobile**: Responsive sheet-based sidebar with smooth animations

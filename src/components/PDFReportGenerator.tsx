@@ -129,7 +129,9 @@ export const PDFReportGenerator = ({
       <Button 
         onClick={generatePDFReport}
         disabled={generating || !repository || !analysis}
-        className="w-full"
+        className="w-full h-10 min-h-[2.5rem] max-h-[2.5rem]"
+        size="default"
+        style={{ height: '2.5rem' }}
       >
         {generating ? (
           <>

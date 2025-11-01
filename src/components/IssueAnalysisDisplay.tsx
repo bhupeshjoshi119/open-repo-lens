@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CustomScrollArea } from "@/components/ui/custom-scrollbar";
 import { AlertCircle, TrendingUp, CheckCircle2, Target, Sparkles } from "lucide-react";
 
 interface IssueAnalysisDisplayProps {
@@ -85,13 +85,13 @@ export const IssueAnalysisDisplay = ({ analysis }: IssueAnalysisDisplayProps) =>
                 <div className="mt-1">{icon}</div>
                 <h4 className="font-semibold text-base flex-1">{title.trim()}</h4>
               </div>
-              <ScrollArea className="max-h-[300px]">
+              <CustomScrollArea className="max-h-[300px]">
                 <div className="prose prose-sm dark:prose-invert max-w-none pr-4">
                   <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans bg-transparent p-0 border-0">
                     {sectionContent}
                   </pre>
                 </div>
-              </ScrollArea>
+              </CustomScrollArea>
             </Card>
           );
         })}

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CustomScrollArea } from "@/components/ui/custom-scrollbar";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SettingsPanel } from "./SettingsPanel";
 import MyRepositories from "./MyRepositories";
+import { ResearchSimplifier } from "./ResearchSimplifier";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -19,12 +20,22 @@ import {
   Settings,
   Upload,
   Brain,
-  GitBranch
+  GitBranch,
+  Sparkles,
+  Languages,
+  CheckCircle,
+  HelpCircle,
+  BarChart3,
+  Zap,
+  Target,
+  Chrome,
+  Lightbulb
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchHistory } from "@/hooks/useSearchHistory";
 import { useRepositoryBookmarks } from "@/hooks/useRepositoryBookmarks";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAiTextProcessor } from "@/hooks/useAiTextProcessor";
 
 interface SidebarProps {
   onSearchHistoryClick: (query: string) => void;
@@ -32,6 +43,7 @@ interface SidebarProps {
   onImageAnalysisClick: () => void;
   onPredictiveAnalysisClick: () => void;
   onRepositorySelect?: (repo: any) => void;
+  onResearchSimplifierClick?: () => void;
   className?: string;
 }
 
@@ -41,46 +53,141 @@ export const Sidebar = ({
   onImageAnalysisClick,
   onPredictiveAnalysisClick,
   onRepositorySelect,
+  onResearchSimplifierClick,
   className 
 }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showMyRepos, setShowMyRepos] = useState(false);
+  const [showResearchSimplifier, setShowResearchSimplifier] = useState(false);
   const { history } = useSearchHistory();
   const { bookmarks } = useRepositoryBookmarks();
   const { isAuthenticated } = useAuth();
+  const { capabilities } = useAiTextProcessor();
 
   const recentHistory = history.slice(0, 5);
   const recentBookmarks = bookmarks.slice(0, 5);
 
+  interface SidebarItem {
+    icon: any;
+    label: string;
+    sublabel?: string;
+    action: () => void;
+    badge?: string;
+    badgeVariant?: "default" | "secondary" | "destructive" | "outline";
+  }
+
   const sidebarItems = [
     {
-      title: "Quick Actions",
+      title: "AI-Powered Tools",
       items: [
-        { icon: Search, label: "New Search", action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
-        ...(isAuthenticated ? [{ icon: GitBranch, label: "My Repositories", action: () => setShowMyRepos(true) }] : []),
-        { icon: Upload, label: "Image Analysis", action: onImageAnalysisClick },
-        { icon: Brain, label: "Predictive Analysis", action: onPredictiveAnalysisClick },
-        { icon: FileText, label: "Generate PDF Report", action: () => {} },
+        { 
+          icon: Sparkles, 
+          label: "Research Simplifier", 
+          sublabel: "Chrome AI text processing",
+          action: () => setShowResearchSimplifier(true),
+          badge: capabilities?.promptApi ? "Available" : "Unavailable",
+          badgeVariant: capabilities?.promptApi ? "default" : "secondary"
+        },
+        { 
+          icon: Brain, 
+          label: "Repository Analysis", 
+          sublabel: "AI-powered insights",
+          action: onPredictiveAnalysisClick 
+        },
+        { 
+          icon: Upload, 
+          label: "Image Analysis", 
+          sublabel: "Analyze repository images",
+          action: onImageAnalysisClick 
+        },
+        { 
+          icon: Chrome, 
+          label: "Chrome AI Demo", 
+          sublabel: "Interactive AI showcase",
+          action: () => window.open('/chrome-ai-demo', '_blank'),
+          badge: "New",
+          badgeVariant: "default"
+        },
       ]
     },
     {
-      title: "Recent Searches",
-      items: recentHistory.map(item => ({
-        icon: History,
-        label: item.query,
-        sublabel: `${item.resultsCount} results`,
-        action: () => onSearchHistoryClick(item.query)
-      }))
+      title: "Chrome AI Features",
+      items: [
+        { 
+          icon: FileText, 
+          label: "Text Summarization", 
+          sublabel: "Summarize documents",
+          action: () => setShowResearchSimplifier(true),
+          badge: capabilities?.summarizer ? "Ready" : "Not Available",
+          badgeVariant: capabilities?.summarizer ? "default" : "secondary"
+        },
+        { 
+          icon: Languages, 
+          label: "Translation", 
+          sublabel: "Multi-language support",
+          action: () => setShowResearchSimplifier(true),
+          badge: capabilities?.translator ? "Ready" : "Not Available",
+          badgeVariant: capabilities?.translator ? "default" : "secondary"
+        },
+        { 
+          icon: CheckCircle, 
+          label: "Proofreading Studio", 
+          sublabel: "Advanced grammar & PDF export",
+          action: () => window.location.href = '/proofreading',
+          badge: "Experimental",
+          badgeVariant: "default"
+        },
+        { 
+          icon: HelpCircle, 
+          label: "Study Questions", 
+          sublabel: "Generate quiz questions",
+          action: () => setShowResearchSimplifier(true),
+          badge: capabilities?.promptApi ? "Ready" : "Not Available",
+          badgeVariant: capabilities?.promptApi ? "default" : "secondary"
+        },
+      ]
     },
     {
-      title: "Bookmarks",
-      items: recentBookmarks.map(repo => ({
-        icon: Bookmark,
-        label: repo.name,
-        sublabel: repo.language || "Unknown",
-        action: () => onBookmarkClick(repo.id)
-      }))
+      title: "Repository Tools",
+      items: [
+        { icon: Search, label: "New Search", action: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+        ...(isAuthenticated ? [{ 
+          icon: GitBranch, 
+          label: "My Repositories", 
+          sublabel: "Personal repos",
+          action: () => setShowMyRepos(true) 
+        }] : []),
+        { 
+          icon: BarChart3, 
+          label: "Analytics Dashboard", 
+          sublabel: "Repository metrics",
+          action: () => {} 
+        },
+        { 
+          icon: FileText, 
+          label: "Generate PDF Report", 
+          sublabel: "Export analysis",
+          action: () => {} 
+        },
+      ]
+    },
+    {
+      title: "Recent Activity",
+      items: [
+        ...recentHistory.slice(0, 3).map(item => ({
+          icon: History,
+          label: item.query,
+          sublabel: `${item.resultsCount} results`,
+          action: () => onSearchHistoryClick(item.query)
+        })),
+        ...recentBookmarks.slice(0, 2).map(repo => ({
+          icon: Bookmark,
+          label: repo.name,
+          sublabel: repo.language || "Unknown",
+          action: () => onBookmarkClick(repo.id)
+        }))
+      ]
     }
   ];
 
@@ -124,7 +231,7 @@ export const Sidebar = ({
         </div>
 
         {/* Navigation */}
-        <ScrollArea className="flex-1 px-2 py-4">
+        <CustomScrollArea className="flex-1 px-2 py-4">
           <div className="space-y-6">
             {sidebarItems.map((section, sectionIdx) => (
               <div key={sectionIdx}>
@@ -148,8 +255,18 @@ export const Sidebar = ({
                       <item.icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
                       {!isCollapsed && (
                         <div className="flex-1 text-left min-w-0">
-                          <div className="truncate text-sm font-medium">
-                            {item.label}
+                          <div className="flex items-center justify-between">
+                            <div className="truncate text-sm font-medium">
+                              {item.label}
+                            </div>
+                            {item.badge && (
+                              <Badge 
+                                variant={item.badgeVariant || "secondary"} 
+                                className="ml-2 text-xs"
+                              >
+                                {item.badge}
+                              </Badge>
+                            )}
                           </div>
                           {item.sublabel && (
                             <div className="truncate text-xs text-muted-foreground">
@@ -168,7 +285,7 @@ export const Sidebar = ({
               </div>
             ))}
           </div>
-        </ScrollArea>
+        </CustomScrollArea>
 
         {/* Footer */}
         <div className="p-4 border-t border-border">
@@ -207,14 +324,33 @@ export const Sidebar = ({
                 My Repositories
               </DialogTitle>
             </DialogHeader>
-            <ScrollArea className="mt-4 max-h-[70vh]">
+            <CustomScrollArea className="mt-4 max-h-[70vh]">
               <MyRepositories onRepositorySelect={(repo) => {
                 if (onRepositorySelect) {
                   onRepositorySelect(repo);
                 }
                 setShowMyRepos(false);
               }} />
-            </ScrollArea>
+            </CustomScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Research Simplifier Dialog */}
+        <Dialog open={showResearchSimplifier} onOpenChange={setShowResearchSimplifier}>
+          <DialogContent className="max-w-6xl max-h-[90vh] w-[95vw]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                Chrome AI Research Simplifier
+              </DialogTitle>
+            </DialogHeader>
+            <CustomScrollArea className="mt-4 max-h-[75vh]">
+              <ResearchSimplifier 
+                onTextProcessed={(result) => {
+                  console.log('Text processed:', result);
+                }}
+              />
+            </CustomScrollArea>
           </DialogContent>
         </Dialog>
       </div>

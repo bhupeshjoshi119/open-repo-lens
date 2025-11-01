@@ -6,19 +6,19 @@ interface Repository {
   id: number;
   name: string;
   full_name: string;
-  description: string | null;
+  description?: string | null;
   html_url: string;
-  stargazers_count: number;
-  forks_count: number;
-  language: string | null;
-  topics: string[];
+  stargazers_count?: number;
+  forks_count?: number;
+  language?: string | null;
+  topics?: string[];
   updated_at: string;
   created_at: string;
   owner: {
     login: string;
     avatar_url: string;
   };
-  open_issues_count: number;
+  open_issues_count?: number;
   license?: { name: string } | null;
   private: boolean;
 }
@@ -42,9 +42,10 @@ export const useUserRepositories = () => {
       setError(null);
       
       const repos = await githubAuth.getUserRepositories(options);
-      setRepositories(repos);
+      setRepositories(repos as Repository[]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch repositories');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch repositories';
+      setError(errorMessage);
       console.error('Error fetching user repositories:', err);
     } finally {
       setLoading(false);
@@ -74,9 +75,10 @@ export const useUserRepositories = () => {
       setError(null);
       
       const repos = await githubAuth.getOrgRepositories(org, options);
-      setRepositories(repos);
+      setRepositories(repos as Repository[]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch organization repositories');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch organization repositories';
+      setError(errorMessage);
       console.error('Error fetching org repositories:', err);
     } finally {
       setLoading(false);

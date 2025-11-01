@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GitBranch, Star, GitFork, Eye, EyeOff, Building, User, ExternalLink } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { CustomScrollArea } from '@/components/ui/custom-scrollbar';
 
 interface MyRepositoriesProps {
   onRepositorySelect?: (repo: any) => void;
@@ -16,13 +17,13 @@ interface MyRepositoriesProps {
 const MyRepositories = ({ onRepositorySelect }: MyRepositoriesProps) => {
   const { isAuthenticated } = useAuth();
   const { repositories, organizations, loading, error, fetchUserRepositories, fetchOrgRepositories } = useUserRepositories();
-  const [selectedOrg, setSelectedOrg] = useState<string>('');
+  const [selectedOrg, setSelectedOrg] = useState<string>('personal');
   const [visibility, setVisibility] = useState<'all' | 'public' | 'private'>('all');
   const [sortBy, setSortBy] = useState<'updated' | 'created' | 'pushed' | 'full_name'>('updated');
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (selectedOrg) {
+      if (selectedOrg && selectedOrg !== 'personal') {
         fetchOrgRepositories(selectedOrg, { 
           type: visibility === 'all' ? 'all' : visibility,
           sort: sortBy,
@@ -102,13 +103,13 @@ const MyRepositories = ({ onRepositorySelect }: MyRepositoriesProps) => {
             <SelectValue placeholder="Select source" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">
+            <SelectItem value="personal">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 Personal
               </div>
             </SelectItem>
-            {organizations.map((org) => (
+            {organizations?.map((org) => (
               <SelectItem key={org.login} value={org.login}>
                 <div className="flex items-center gap-2">
                   <Building className="h-4 w-4" />
@@ -154,14 +155,15 @@ const MyRepositories = ({ onRepositorySelect }: MyRepositoriesProps) => {
       </div>
 
       {/* Repository List */}
-      <div className="space-y-3 max-h-[600px] overflow-y-auto">
+      <CustomScrollArea className="max-h-[600px]">
+        <div className="space-y-3">
         {repositories.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <GitBranch className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>No repositories found</p>
           </div>
         ) : (
-          repositories.map((repo) => (
+          repositories?.map((repo) => (
             <Card 
               key={repo.id} 
               className="cursor-pointer hover:shadow-md transition-shadow"
@@ -170,7 +172,7 @@ const MyRepositories = ({ onRepositorySelect }: MyRepositoriesProps) => {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-medium text-sm">{repo.name}</h4>
+                    <h4 className="font-medium text-sm">{repo.name || 'Unnamed Repository'}</h4>
                     {repo.private && (
                       <Badge variant="secondary" className="text-xs">
                         <EyeOff className="h-3 w-3 mr-1" />
@@ -200,19 +202,19 @@ const MyRepositories = ({ onRepositorySelect }: MyRepositoriesProps) => {
                   )}
                   <div className="flex items-center gap-1">
                     <Star className="h-3 w-3" />
-                    {repo.stargazers_count}
+                    {repo.stargazers_count || 0}
                   </div>
                   <div className="flex items-center gap-1">
                     <GitFork className="h-3 w-3" />
-                    {repo.forks_count}
+                    {repo.forks_count || 0}
                   </div>
                   <span>Updated {formatDate(repo.updated_at)}</span>
                 </div>
 
                 {repo.topics && repo.topics.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
-                    {repo.topics.slice(0, 3).map((topic) => (
-                      <Badge key={topic} variant="outline" className="text-xs">
+                    {repo.topics.slice(0, 3).map((topic, index) => (
+                      <Badge key={`${topic}-${index}`} variant="outline" className="text-xs">
                         {topic}
                       </Badge>
                     ))}
@@ -227,7 +229,8 @@ const MyRepositories = ({ onRepositorySelect }: MyRepositoriesProps) => {
             </Card>
           ))
         )}
-      </div>
+        </div>
+      </CustomScrollArea>
     </div>
   );
 };
