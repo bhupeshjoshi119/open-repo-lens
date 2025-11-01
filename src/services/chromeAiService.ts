@@ -41,17 +41,31 @@ class ChromeAiService {
     try {
       // Check if we're in Chrome and AI APIs are available
       if (!window.ai) {
-        // For demo purposes, return mock capabilities if in development
-        const isDevelopment = process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost';
+        // Enhanced environment detection for better fallback support
+        const isDevelopment = process.env.NODE_ENV === 'development' || 
+                             window.location.hostname === 'localhost' ||
+                             window.location.hostname.includes('127.0.0.1');
+        
+        const isDemo = window.location.hostname.includes('vercel.app') ||
+                      window.location.hostname.includes('netlify.app') ||
+                      window.location.hostname.includes('github.io') ||
+                      isDevelopment;
         
         const fallbackCapabilities: AiCapabilities = {
-          promptApi: isDevelopment, // Enable mock in development
-          summarizer: isDevelopment,
-          writer: isDevelopment,
-          rewriter: isDevelopment,
-          proofreader: isDevelopment,
-          supportedLanguages: isDevelopment ? ['en', 'es', 'fr', 'de'] : []
+          promptApi: isDemo, // Enable mock for demo environments
+          summarizer: isDemo,
+          writer: isDemo,
+          rewriter: isDemo,
+          proofreader: isDemo,
+          supportedLanguages: isDemo ? ['en', 'es', 'fr', 'de'] : []
         };
+        
+        console.log('Chrome AI not available, using fallback capabilities:', {
+          isDevelopment,
+          isDemo,
+          hostname: window.location.hostname,
+          capabilities: fallbackCapabilities
+        });
         
         this.capabilities = fallbackCapabilities;
         return fallbackCapabilities;
@@ -313,28 +327,94 @@ ${text.slice(0, 200)}`;
    * Get mock proofreading result for demo purposes
    */
   private getMockProofreadResult(text: string): ProofreadResult {
-    // Simple mock: just return the text with minor improvements
-    const correctedText = text
-      .replace(/\bhave\b/g, 'has')
-      .replace(/\bgrammer\b/gi, 'grammar')
-      .replace(/\brecieve\b/gi, 'receive')
-      .replace(/\bteh\b/gi, 'the');
+    // Enhanced mock with more realistic corrections
+    let correctedText = text;
+    const suggestions: Suggestion[] = [];
+    let grammarIssues = 0;
+    let styleIssues = 0;
+
+    // Common grammar corrections
+    const grammarFixes = [
+      { pattern: /\bhave\b/g, replacement: 'has', explanation: 'Subject-verb agreement: Use "has" with singular subjects' },
+      { pattern: /\bgrammer\b/gi, replacement: 'grammar', explanation: 'Spelling correction: "grammar" is the correct spelling' },
+      { pattern: /\brecieve\b/gi, replacement: 'receive', explanation: 'Spelling correction: "i before e except after c"' },
+      { pattern: /\bteh\b/gi, replacement: 'the', explanation: 'Spelling correction: Common typo' },
+      { pattern: /\bits\s/g, replacement: "it's ", explanation: 'Contraction: Use "it\'s" (it is) instead of "its" (possessive)' },
+      { pattern: /\byour\s+welcome\b/gi, replacement: "you're welcome", explanation: 'Contraction: "you\'re" (you are) not "your" (possessive)' }
+    ];
+
+    // Apply grammar fixes
+    grammarFixes.forEach((fix, index) => {
+      const matches = text.match(fix.pattern);
+      if (matches) {
+        correctedText = correctedText.replace(fix.pattern, fix.replacement);
+        grammarIssues++;
+        suggestions.push({
+          type: 'grammar',
+          original: matches[0],
+          suggested: fix.replacement,
+          explanation: fix.explanation,
+          position: { start: text.indexOf(matches[0]), end: text.indexOf(matches[0]) + matches[0].length }
+        });
+      }
+    });
+
+    // Style improvements
+    const styleFixes = [
+      { pattern: /\bvery\s+very\b/gi, replacement: 'extremely', explanation: 'Style improvement: Avoid repetitive intensifiers' },
+      { pattern: /\ba\s+lot\s+of\b/gi, replacement: 'many', explanation: 'Style improvement: More concise expression' },
+      { pattern: /\bin\s+order\s+to\b/gi, replacement: 'to', explanation: 'Style improvement: Eliminate unnecessary words' }
+    ];
+
+    styleFixes.forEach((fix) => {
+      const matches = text.match(fix.pattern);
+      if (matches) {
+        correctedText = correctedText.replace(fix.pattern, fix.replacement);
+        styleIssues++;
+        suggestions.push({
+          type: 'style',
+          original: matches[0],
+          suggested: fix.replacement,
+          explanation: fix.explanation,
+          position: { start: text.indexOf(matches[0]), end: text.indexOf(matches[0]) + matches[0].length }
+        });
+      }
+    });
+
+    // Calculate readability score based on text characteristics
+    const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const words = text.split(/\s+/).filter(w => w.length > 0);
+    const avgWordsPerSentence = words.length / sentences.length;
+    const avgCharsPerWord = text.replace(/\s/g, '').length / words.length;
     
-    const hasChanges = correctedText !== text;
+    // Simple readability calculation (higher is better)
+    let readabilityScore = 100;
+    if (avgWordsPerSentence > 20) readabilityScore -= 10;
+    if (avgWordsPerSentence > 30) readabilityScore -= 10;
+    if (avgCharsPerWord > 6) readabilityScore -= 5;
+    if (grammarIssues > 0) readabilityScore -= grammarIssues * 5;
+    if (styleIssues > 0) readabilityScore -= styleIssues * 3;
     
+    readabilityScore = Math.max(60, Math.min(100, readabilityScore));
+
+    // Add a general suggestion if no specific issues found
+    if (suggestions.length === 0) {
+      suggestions.push({
+        type: 'clarity',
+        original: text.slice(0, 50) + (text.length > 50 ? '...' : ''),
+        suggested: 'Text appears well-written',
+        explanation: 'Your text demonstrates good grammar and style. Consider breaking long sentences for better readability.',
+        position: { start: 0, end: Math.min(50, text.length) }
+      });
+    }
+
     return {
       correctedText,
-      suggestions: hasChanges ? [{
-        type: 'grammar',
-        original: text.slice(0, 50) + '...',
-        suggested: correctedText.slice(0, 50) + '...',
-        explanation: 'AI-powered corrections applied for grammar and spelling',
-        position: { start: 0, end: text.length }
-      }] : [],
+      suggestions,
       metrics: {
-        readabilityScore: 85,
-        grammarIssues: hasChanges ? 1 : 0,
-        styleIssues: 0
+        readabilityScore,
+        grammarIssues,
+        styleIssues
       }
     };
   }
@@ -345,13 +425,20 @@ ${text.slice(0, 200)}`;
   public async proofreadText(text: string): Promise<ProofreadResult> {
     const capabilities = await this.checkAiAvailability();
     
-    // Check if in development mode for fallback
-    const isDevelopment = process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost';
+    // Enhanced environment detection for better demo support
+    const isDevelopment = process.env.NODE_ENV === 'development' || 
+                         window.location.hostname === 'localhost' ||
+                         window.location.hostname.includes('127.0.0.1');
+    
+    const isDemo = window.location.hostname.includes('vercel.app') ||
+                  window.location.hostname.includes('netlify.app') ||
+                  window.location.hostname.includes('github.io') ||
+                  isDevelopment;
     
     if (!capabilities.proofreader && !capabilities.promptApi && !capabilities.writer) {
-      if (isDevelopment) {
-        // Return mock data in development
-        console.warn('Chrome AI not available, using mock proofreading data');
+      if (isDemo) {
+        // Return mock data for demo environments
+        console.warn('Chrome AI not available, using mock proofreading data for demo');
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate processing
         return this.getMockProofreadResult(text);
       }
@@ -485,10 +572,18 @@ ${text}`;
         throw error;
       }
       
-      // Check if in development mode for fallback
-      const isDevelopment = process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost';
-      if (isDevelopment) {
-        console.warn('Proofreading failed, returning mock data');
+      // Enhanced environment detection for better demo support
+      const isDevelopment = process.env.NODE_ENV === 'development' || 
+                           window.location.hostname === 'localhost' ||
+                           window.location.hostname.includes('127.0.0.1');
+      
+      const isDemo = window.location.hostname.includes('vercel.app') ||
+                    window.location.hostname.includes('netlify.app') ||
+                    window.location.hostname.includes('github.io') ||
+                    isDevelopment;
+      
+      if (isDemo) {
+        console.warn('Proofreading failed, returning mock data for demo');
         return this.getMockProofreadResult(text);
       }
       

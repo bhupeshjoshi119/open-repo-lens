@@ -23,6 +23,7 @@ import { generateProofreadingPDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/hooks/use-toast';
 import UserProfile from '@/components/UserProfile';
 import { ChromeAiStatus } from '@/components/ChromeAiStatus';
+import { ChromeAiCompatibilityBanner } from '@/components/ChromeAiCompatibilityBanner';
 
 export const ProofreadingStudio: React.FC = () => {
   const [originalText, setOriginalText] = useState('');
@@ -160,6 +161,9 @@ export const ProofreadingStudio: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Chrome AI Compatibility Banner */}
+      <ChromeAiCompatibilityBanner className="mb-6" />
 
       <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Centered Profile/Action Button - Visible on large screens */}
